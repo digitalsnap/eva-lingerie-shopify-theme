@@ -8,9 +8,12 @@
   --eva-gutter: clamp(1rem, 5.6vw, 4.5rem);
   --eva-page-max: 82.5rem;
   --eva-header-height: 3.5rem;
+  /* Shown behind images while they load: a whisper of warmth on the white page. */
+  --eva-media-tint: color-mix(in srgb, var(--eva-charcoal) 4%, var(--eva-ivory));
   --eva-tracking-label: 0.22em;
   --eva-tracking-nav: 0.14em;
   --eva-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --eva-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --eva-duration: 0.25s;
 }
 
@@ -310,6 +313,36 @@ summary::-webkit-details-marker {
   --eva-muted: var(--eva-ivory);
   --eva-eyebrow: var(--eva-ivory);
   --eva-line: color-mix(in srgb, var(--eva-ivory) 30%, var(--eva-wine));
+}
+
+/* Text over photography. Set on banners that have an image or video; overrides the colour scheme
+   there, with a matching veil (black under light text, white under dark text). Light text always
+   keeps a light veil, and a dark ground shows while the image loads (or if it fails), so it is
+   never white on white. */
+
+.eva-on-media-light {
+  --eva-fg: #fff;
+  --eva-bg: var(--eva-charcoal);
+  --eva-muted: rgb(255 255 255 / 0.88);
+  --eva-eyebrow: #fff;
+  --eva-line: rgb(255 255 255 / 0.45);
+  --eva-veil: #000;
+  --eva-overlay-min: 0.15;
+
+  background-color: color-mix(in srgb, var(--eva-charcoal) 70%, #fff);
+  color: #fff;
+}
+
+.eva-on-media-dark {
+  --eva-fg: var(--eva-charcoal);
+  --eva-bg: #fff;
+  --eva-muted: var(--eva-charcoal);
+  --eva-eyebrow: var(--eva-charcoal);
+  --eva-line: rgb(43 34 38 / 0.3);
+  --eva-veil: #fff;
+
+  background-color: var(--eva-media-tint);
+  color: var(--eva-charcoal);
 }
 
 /* Typography */
@@ -677,7 +710,7 @@ summary::-webkit-details-marker {
 .eva-media {
   position: relative;
   overflow: hidden;
-  background-color: var(--eva-blush);
+  background-color: var(--eva-media-tint);
 }
 
 .eva-media > :is(img, video, svg),
@@ -690,8 +723,65 @@ summary::-webkit-details-marker {
 }
 
 .eva-placeholder {
-  background-color: var(--eva-blush);
-  fill: color-mix(in srgb, var(--eva-charcoal) 25%, var(--eva-blush));
+  background-color: var(--eva-media-tint);
+  fill: color-mix(in srgb, var(--eva-charcoal) 14%, var(--eva-ivory));
+}
+
+/* Motion (assets/eva-motion.js). Transform and opacity only, so nothing shifts the layout. */
+
+/* Fade up into view. Hidden only once the script runs, so content never disappears without it. */
+html.eva-motion-js [data-eva-reveal]:not(.is-revealed) {
+  opacity: 0;
+  transform: translate3d(0, 1.75rem, 0);
+}
+
+html.eva-motion [data-eva-reveal] {
+  transition: opacity 1s var(--eva-ease-out), transform 1s var(--eva-ease-out);
+  transition-delay: var(--eva-reveal-delay, 0ms);
+}
+
+/* Headline rises in word by word on load. Starts at first paint, so it never holds up the page. */
+@keyframes eva-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.45em, 0);
+  }
+}
+
+.eva-split__word {
+  display: inline-block;
+}
+
+html.eva-motion .eva-split__word {
+  animation: eva-rise 1.1s var(--eva-ease-out) both;
+  animation-delay: calc(var(--eva-word, 0) * 70ms + 120ms);
+}
+
+html.eva-motion .eva-rise {
+  animation: eva-rise 1.1s var(--eva-ease-out) both;
+  animation-delay: var(--eva-rise-delay, 0ms);
+}
+
+/* Gentle settle: large photographs ease from a slight zoom to rest as they appear; category
+   images as they scroll into view (not those on screen from the start, which would jump). It
+   plays once, in under five seconds, so it needs no pause control (WCAG 2.2.2), and hover zoom
+   takes over once it ends. */
+@keyframes eva-settle {
+  from {
+    transform: scale(1.06);
+  }
+}
+
+html.eva-ambient :is(.eva-banner__image, .is-entering .eva-tile__media img) {
+  animation: eva-settle 4.5s var(--eva-ease-out) backwards;
+}
+
+/* Printing shows everything, whether or not it has scrolled into view yet. */
+@media print {
+  [data-eva-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

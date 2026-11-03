@@ -74,7 +74,7 @@
                 assign card_loading = 'eager'
               endif
             -%}
-            <li>
+            <li data-eva-reveal>
               {%- render 'eva-article-card', article: article, sizes: sizes, loading: card_loading -%}
             </li>
           {%- endfor -%}

@@ -1,0 +1,597 @@
+{%- liquid
+  assign code = section.settings.discount_code | strip
+  assign show_offer = section.settings.enabled
+  if code == blank or template.name == 'cart' or template.name == 'password'
+    assign show_offer = false
+  endif
+  if section.settings.hide_for_customers and customer.accepts_marketing
+    assign show_offer = false
+  endif
+  if request.design_mode and section.settings.enabled and code != blank
+    assign show_offer = true
+  endif
+  assign form_id = 'EvaWelcomeForm'
+-%}
+
+{%- if show_offer -%}
+  <script
+    src="{{ 'eva-welcome.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+
+  {%- comment -%}
+    The form wraps the whole offer so the page that comes back after signing up can render the
+    unlocked state straight away. Shopify's customer form saves the email with marketing consent.
+  {%- endcomment -%}
+  {%- form 'customer', id: form_id, class: 'eva-welcome-form' -%}
+    <eva-welcome-offer
+      class="eva-welcome"
+      data-code="{{ code | escape }}"
+      data-delay="{{ section.settings.delay }}"
+      data-dismiss-days="{{ section.settings.dismiss_days }}"
+      data-root="{{ routes.root_url }}"
+      {% if section.settings.auto_open_mobile %}
+        data-auto-open-mobile
+      {% endif %}
+      {% if section.settings.show_teaser %}
+        data-teaser
+      {% endif %}
+      {% if form.posted_successfully? %}
+        data-success
+      {% elsif form.errors %}
+        data-error
+      {% endif %}
+      {% if request.design_mode %}
+        data-design-mode
+      {% endif %}
+      data-view="{% if form.posted_successfully? %}code{% else %}form{% endif %}"
+    >
+      {%- if section.settings.show_teaser -%}
+        <div
+          class="eva-welcome__teaser"
+          data-welcome-teaser
+          hidden
+        >
+          <button
+            type="button"
+            class="eva-welcome__teaser-open"
+            data-welcome-open
+            aria-haspopup="dialog"
+            aria-controls="EvaWelcome"
+          >
+            {{- section.settings.teaser_label | escape -}}
+          </button>
+          <button
+            type="button"
+            class="eva-welcome__teaser-close"
+            data-welcome-hide-teaser
+            aria-label="{{ 'eva.welcome.hide_teaser' | t }}"
+          >
+            {%- render 'eva-icon', icon: 'close' -%}
+          </button>
+        </div>
+      {%- endif -%}
+
+      <dialog-component id="EvaWelcome">
+        <dialog
+          ref="dialog"
+          class="eva-welcome__dialog eva-scheme-ivory{% if section.settings.image != blank %} eva-welcome__dialog--has-image{% endif %}"
+          aria-labelledby="EvaWelcomeTitle"
+        >
+          {%- if section.settings.image != blank -%}
+            <div class="eva-welcome__media eva-media">
+              {{
+                section.settings.image
+                | image_url: width: 900
+                | image_tag: widths: '450, 600, 900', sizes: '22rem', loading: 'lazy', alt: ''
+              }}
+            </div>
+          {%- endif -%}
+
+          <div class="eva-welcome__content">
+            <button
+              type="button"
+              class="eva-icon-button eva-welcome__close"
+              on:click="dialog-component/closeDialog"
+              aria-label="{{ 'eva.welcome.close' | t }}"
+            >
+              {%- render 'eva-icon', icon: 'close' -%}
+            </button>
+
+            {%- comment -%} View 1: the offer and the sign-up. {%- endcomment -%}
+            <div
+              class="eva-welcome__view"
+              data-welcome-view="form"
+            >
+              {%- if section.settings.eyebrow != blank -%}
+                <p class="eva-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+              {%- endif -%}
+              <h2
+                id="EvaWelcomeTitle"
+                class="eva-heading eva-heading--md"
+              >
+                {{- section.settings.heading -}}
+              </h2>
+              {%- if section.settings.text != blank -%}
+                <p class="eva-body eva-welcome__text">{{ section.settings.text }}</p>
+              {%- endif -%}
+
+              <input
+                type="hidden"
+                name="contact[tags]"
+                value="newsletter, welcome-offer"
+              >
+              <div class="eva-welcome__field">
+                <label
+                  for="EvaWelcomeEmail"
+                  class="visually-hidden"
+                >
+                  {{- 'eva.newsletter.email_label' | t -}}
+                </label>
+                <input
+                  id="EvaWelcomeEmail"
+                  class="eva-welcome__input"
+                  type="email"
+                  name="contact[email]"
+                  autocomplete="email"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  required
+                  placeholder="{{ section.settings.placeholder | escape }}"
+                  {% if form.errors %}
+                    aria-invalid="true"
+                    aria-describedby="EvaWelcomeError"
+                  {% endif %}
+                >
+                <button
+                  type="submit"
+                  class="eva-button eva-button--primary"
+                >
+                  {{- section.settings.button_label | escape -}}
+                </button>
+              </div>
+
+              {%- if form.errors -%}
+                <p
+                  id="EvaWelcomeError"
+                  class="eva-welcome__error"
+                  role="alert"
+                >
+                  {{- 'eva.welcome.error' | t -}}
+                </p>
+              {%- endif -%}
+
+              <p class="eva-caption eva-welcome__consent">
+                {{ section.settings.consent }}
+                {%- if shop.privacy_policy.body != blank %}
+                  <a href="{{ shop.privacy_policy.url }}">{{ 'eva.welcome.privacy' | t }}</a>
+                {%- endif -%}
+              </p>
+
+              <div class="eva-welcome__actions">
+                {%- if section.settings.one_tap -%}
+                  <button
+                    type="button"
+                    class="eva-link eva-welcome__one-tap"
+                    data-welcome-unlock
+                  >
+                    {{- section.settings.one_tap_label | escape -}}
+                  </button>
+                {%- endif -%}
+                <button
+                  type="button"
+                  class="eva-link eva-welcome__dismiss"
+                  on:click="dialog-component/closeDialog"
+                >
+                  {{- 'eva.welcome.no_thanks' | t -}}
+                </button>
+              </div>
+            </div>
+
+            {%- comment -%} View 2: the unlocked code. {%- endcomment -%}
+            <div
+              class="eva-welcome__view"
+              data-welcome-view="code"
+            >
+              <p class="eva-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+              <p class="eva-heading eva-heading--md">{{ section.settings.success_heading }}</p>
+              <p class="eva-body eva-welcome__text">{{ section.settings.success_text }}</p>
+              <div class="eva-welcome__code">
+                <span class="eva-welcome__code-value">{{ code | escape }}</span>
+                <button
+                  type="button"
+                  class="eva-link"
+                  data-welcome-copy
+                  data-label-copied="{{ 'eva.welcome.copied' | t | escape }}"
+                >
+                  {{- 'eva.welcome.copy' | t -}}
+                </button>
+              </div>
+              <p
+                class="eva-caption"
+                data-welcome-applied
+                hidden
+              >
+                {{- 'eva.welcome.applied' | t -}}
+              </p>
+              <button
+                type="button"
+                class="eva-button eva-button--outline eva-welcome__shop"
+                on:click="dialog-component/closeDialog"
+              >
+                {{- 'eva.welcome.start_shopping' | t -}}
+              </button>
+            </div>
+
+            <p
+              class="visually-hidden"
+              role="status"
+              data-welcome-status
+            ></p>
+          </div>
+        </dialog>
+      </dialog-component>
+    </eva-welcome-offer>
+  {%- endform -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-welcome__teaser {
+    position: fixed;
+    inset-block-end: 1rem;
+    inset-inline-start: 1rem;
+    z-index: var(--layer-raised);
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--eva-charcoal);
+    background-color: var(--eva-ivory);
+    color: var(--eva-charcoal);
+    box-shadow: 0 0.5rem 1.5rem rgb(43 34 38 / 0.12);
+  }
+
+  .eva-welcome__teaser[hidden] {
+    display: none;
+  }
+
+  .eva-welcome__teaser-open {
+    padding: 0.75rem 1rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.6875rem;
+    letter-spacing: var(--eva-tracking-label);
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .eva-welcome__teaser-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    border: 0;
+    border-inline-start: 1px solid var(--eva-line);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .eva-welcome__teaser-close .eva-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  html.eva-motion .eva-welcome__teaser:not([hidden]) {
+    animation: eva-rise 0.8s var(--eva-ease-out) both;
+  }
+
+  .eva-welcome__dialog {
+    width: min(26rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    overflow: auto;
+  }
+
+  .eva-welcome__dialog::backdrop {
+    background-color: rgb(43 34 38 / 0.5);
+  }
+
+  .eva-welcome__dialog[open] {
+    display: grid;
+    animation: eva-rise 0.5s var(--eva-ease-out);
+  }
+
+  .eva-welcome__dialog.dialog-closing {
+    animation: eva-welcome-out 0.2s var(--eva-ease) forwards;
+  }
+
+  @keyframes eva-welcome-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  .eva-welcome__media {
+    display: none;
+  }
+
+  .eva-welcome__content {
+    position: relative;
+    padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 4vw, 2.5rem);
+    text-align: center;
+  }
+
+  .eva-welcome__close {
+    position: absolute;
+    inset-block-start: 0.5rem;
+    inset-inline-end: 0.5rem;
+  }
+
+  .eva-welcome__view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  eva-welcome-offer[data-view='form'] [data-welcome-view='code'],
+  eva-welcome-offer[data-view='code'] [data-welcome-view='form'] {
+    display: none;
+  }
+
+  .eva-welcome__text {
+    color: var(--eva-muted);
+  }
+
+  .eva-welcome__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    margin-block-start: 0.5rem;
+  }
+
+  .eva-welcome__input {
+    width: 100%;
+    min-height: 2.875rem;
+    padding-inline: 1rem;
+    border: 1px solid var(--eva-border);
+    border-radius: 0;
+    background-color: #fff;
+    color: var(--eva-charcoal);
+    font-size: 0.9375rem;
+    text-align: center;
+  }
+
+  .eva-welcome__error {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--eva-wine);
+  }
+
+  .eva-welcome__consent a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: currentcolor;
+  }
+
+  .eva-welcome__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .eva-welcome__actions .eva-link {
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .eva-welcome__dismiss {
+    color: var(--eva-muted);
+  }
+
+  .eva-welcome__code {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px dashed var(--eva-charcoal);
+  }
+
+  .eva-welcome__code-value {
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 1.125rem;
+    letter-spacing: 0.18em;
+  }
+
+  .eva-welcome__code .eva-link {
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .eva-welcome__shop {
+    margin-block-start: 0.5rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .eva-welcome__dialog--has-image {
+      width: min(52rem, calc(100vw - 4rem));
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .eva-welcome__dialog--has-image .eva-welcome__media {
+      display: block;
+      min-height: 100%;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.welcome_offer",
+  "class": "eva-welcome-section",
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:eva.content.welcome_info"
+    },
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "t:eva.settings.welcome_enabled",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "discount_code",
+      "label": "t:eva.settings.discount_code",
+      "info": "t:eva.info.discount_code",
+      "default": "WELCOME10"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:eva.settings.image"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:eva.settings.eyebrow",
+      "default": "Welcome to Eva"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:eva.settings.heading",
+      "default": "Enjoy 10% off your first order"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "text",
+      "label": "t:eva.settings.text",
+      "default": "Join the list for early access to new drops and private offers."
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "t:eva.settings.placeholder",
+      "default": "Your email"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:eva.settings.button_label",
+      "default": "Unlock my 10%"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "consent",
+      "label": "t:eva.settings.consent",
+      "info": "t:eva.info.consent",
+      "default": "By signing up you agree to receive marketing emails from Eva Lingerie. Unsubscribe at any time."
+    },
+    {
+      "type": "checkbox",
+      "id": "one_tap",
+      "label": "t:eva.settings.one_tap",
+      "info": "t:eva.info.one_tap",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "one_tap_label",
+      "label": "t:eva.settings.one_tap_label",
+      "default": "Unlock without signing up"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "success_heading",
+      "label": "t:eva.settings.success_heading",
+      "default": "Your 10% is unlocked"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "success_text",
+      "label": "t:eva.settings.success_text",
+      "default": "Use this code at checkout on your first order."
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.welcome_timing"
+    },
+    {
+      "type": "range",
+      "id": "delay",
+      "label": "t:eva.settings.welcome_delay",
+      "info": "t:eva.info.welcome_delay",
+      "min": 3,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_open_mobile",
+      "label": "t:eva.settings.welcome_auto_mobile",
+      "info": "t:eva.info.welcome_auto_mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_teaser",
+      "label": "t:eva.settings.welcome_teaser",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "teaser_label",
+      "label": "t:eva.settings.welcome_teaser_label",
+      "default": "Unlock 10% off"
+    },
+    {
+      "type": "range",
+      "id": "dismiss_days",
+      "label": "t:eva.settings.welcome_dismiss_days",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "unit": "d",
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_for_customers",
+      "label": "t:eva.settings.welcome_hide_subscribers",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.welcome_offer"
+    }
+  ]
+}
+{% endschema %}

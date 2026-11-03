@@ -1,19 +1,22 @@
 {%- assign heading_id = 'EvaTilesHeading-' | append: section.id -%}
 
 <div
-  class="eva-tiles eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  class="eva-tiles eva-tiles--{{ section.settings.layout }} eva-section eva-scheme-{{ section.settings.color_scheme }}"
   style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-tile-ratio: {{ section.settings.tile_ratio }}; --eva-tile-count: {{ section.blocks.size | at_least: 1 }};"
 >
-  <div class="eva-page">
-    {%- if section.settings.heading != blank -%}
+  {%- if section.settings.heading != blank -%}
+    <div class="eva-page">
       <h2
         id="{{ heading_id }}"
         class="eva-heading eva-heading--sm eva-tiles__heading{% if section.settings.hide_heading %} visually-hidden{% endif %}"
       >
         {{- section.settings.heading | escape -}}
       </h2>
-    {%- endif -%}
+    </div>
+  {%- endif -%}
 
+  {%- comment -%} Large tiles run edge to edge, like full-width editorial banners. {%- endcomment -%}
+  <div class="{% if section.settings.layout == 'row' %}eva-page{% else %}eva-tiles__bleed{% endif %}">
     <ul
       class="eva-tiles__list"
       role="list"
@@ -33,6 +36,13 @@
   }
 
   .eva-tiles__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Row: a strip of portrait tiles that swipes on phones. */
+  .eva-tiles--row .eva-tiles__list {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 78%;
@@ -47,16 +57,36 @@
     scrollbar-width: none;
   }
 
-  .eva-tiles__list::-webkit-scrollbar {
+  .eva-tiles--row .eva-tiles__list::-webkit-scrollbar {
     display: none;
   }
 
-  .eva-tile {
+  .eva-tiles--row .eva-tile {
     scroll-snap-align: start;
   }
 
+  /* Large: big, uniform category images, two per row on desktop and one per row on phones. */
+  .eva-tiles--editorial .eva-tiles__list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
   @media screen and (min-width: 750px) {
-    .eva-tiles__list {
+    .eva-tiles--editorial .eva-tiles__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* An odd tile out fills the last row as a wide banner. */
+    .eva-tiles--editorial .eva-tile:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+
+    .eva-tiles--editorial .eva-tile:last-child:nth-child(odd) .eva-tile__link {
+      aspect-ratio: 21 / 9;
+    }
+
+    .eva-tiles--row .eva-tiles__list {
       grid-auto-flow: row;
       grid-template-columns: repeat(var(--eva-tile-count), minmax(0, 1fr));
       gap: 1rem;
@@ -82,6 +112,23 @@
   ],
   "settings": [
     {
+      "type": "select",
+      "id": "layout",
+      "label": "t:eva.settings.layout",
+      "options": [
+        { "value": "editorial", "label": "t:eva.options.layout_large" },
+        { "value": "row", "label": "t:eva.options.layout_row" }
+      ],
+      "default": "editorial"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "t:eva.settings.cta_label",
+      "info": "t:eva.info.cta_label",
+      "default": "Shop now"
+    },
+    {
       "type": "text",
       "id": "heading",
       "label": "t:eva.settings.heading",
@@ -101,9 +148,10 @@
       "options": [
         { "value": "4 / 5", "label": "4:5" },
         { "value": "3 / 4", "label": "3:4" },
-        { "value": "1 / 1", "label": "1:1" }
+        { "value": "1 / 1", "label": "1:1" },
+        { "value": "8 / 7", "label": "8:7" }
       ],
-      "default": "4 / 5"
+      "default": "1 / 1"
     },
     {
       "type": "select",
@@ -148,6 +196,7 @@
       "blocks": [
         { "type": "_eva-category-tile", "settings": { "label": "Bras" } },
         { "type": "_eva-category-tile", "settings": { "label": "Sets" } },
+        { "type": "_eva-category-tile", "settings": { "label": "Bodysuits" } },
         { "type": "_eva-category-tile", "settings": { "label": "Sleep & Lounge" } }
       ]
     }

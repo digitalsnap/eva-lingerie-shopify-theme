@@ -13,9 +13,28 @@
 
 <li
   class="eva-tile"
+  data-eva-reveal
   {{ block.shopify_attributes }}
 >
-  {%- render 'eva-collection-tile', url: url, label: label, image: image -%}
+  {%- liquid
+    if section.settings.layout == 'row'
+      assign tile_sizes = '(min-width: 750px) 33vw, 80vw'
+      assign tile_size = 'regular'
+      assign tile_cta = ''
+    else
+      assign tile_sizes = '(min-width: 750px) 50vw, 100vw'
+      assign tile_size = 'large'
+      assign tile_cta = section.settings.cta_label
+    endif
+  -%}
+  {%- render 'eva-collection-tile',
+    url: url,
+    label: label,
+    image: image,
+    sizes: tile_sizes,
+    size: tile_size,
+    cta: tile_cta
+  -%}
 </li>
 
 {% schema %}

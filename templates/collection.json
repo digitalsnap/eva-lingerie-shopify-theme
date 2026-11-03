@@ -15,8 +15,9 @@
         "eyebrow": "Collection",
         "show_description": true,
         "show_image": true,
-        "overlay_opacity": 0,
-        "color_scheme": "blush"
+        "overlay_opacity": 30,
+        "color_scheme": "ivory",
+        "media_text": "light"
       }
     },
     "main": {

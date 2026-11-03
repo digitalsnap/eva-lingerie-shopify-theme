@@ -84,7 +84,7 @@
         "type": "color",
         "id": "eva_color_ivory",
         "label": "t:eva.settings.ivory",
-        "default": "#FBF7F4"
+        "default": "#FFFFFF"
       },
       {
         "type": "color",
@@ -166,6 +166,25 @@
         "id": "eva_free_returns",
         "label": "t:eva.settings.free_returns",
         "default": true
+      },
+      {
+        "type": "header",
+        "content": "t:eva.content.motion"
+      },
+      {
+        "type": "checkbox",
+        "id": "eva_motion",
+        "label": "t:eva.settings.motion",
+        "info": "t:eva.info.motion",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "eva_motion_ambient",
+        "label": "t:eva.settings.motion_ambient",
+        "info": "t:eva.info.motion_ambient",
+        "default": true,
+        "visible_if": "{{ settings.eva_motion }}"
       },
       {
         "type": "header",

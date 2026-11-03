@@ -15,7 +15,7 @@
         "ratio_desktop": "16 / 9",
         "ratio_mobile": "4 / 5",
         "overlay_opacity": 20,
-        "color_scheme": "plum",
+        "color_scheme": "ivory",
         "content_position": "center",
         "eyebrow": "The Silk Edit",
         "heading": "Made to be seen, designed to be felt.",
@@ -23,7 +23,8 @@
         "text": "",
         "button_label": "Shop the edit",
         "button_link": "shopify://collections/all",
-        "button_style": "outline"
+        "button_style": "outline",
+        "media_text": "light"
       }
     },
     "categories": {
@@ -41,6 +42,12 @@
             "label": "Sets"
           }
         },
+        "tile_bodysuits": {
+          "type": "_eva-category-tile",
+          "settings": {
+            "label": "Bodysuits"
+          }
+        },
         "tile_sleep": {
           "type": "_eva-category-tile",
           "settings": {
@@ -51,15 +58,18 @@
       "block_order": [
         "tile_bras",
         "tile_sets",
+        "tile_bodysuits",
         "tile_sleep"
       ],
       "settings": {
+        "layout": "editorial",
+        "cta_label": "Shop now",
         "heading": "Shop by category",
         "hide_heading": true,
-        "tile_ratio": "4 / 5",
+        "tile_ratio": "1 / 1",
         "color_scheme": "ivory",
-        "padding_top": 24,
-        "padding_bottom": 24
+        "padding_top": 4,
+        "padding_bottom": 4
       }
     },
     "best_sellers": {
@@ -68,7 +78,7 @@
         "ratio_desktop": "3 / 1",
         "ratio_mobile": "4 / 5",
         "overlay_opacity": 0,
-        "color_scheme": "blush",
+        "color_scheme": "ivory",
         "content_position": "center",
         "eyebrow": "Best sellers",
         "heading": "The Eva Bodysuit",
@@ -76,7 +86,8 @@
         "text": "",
         "button_label": "View collection",
         "button_link": "shopify://collections/all",
-        "button_style": "outline"
+        "button_style": "outline",
+        "media_text": "dark"
       }
     },
     "silk_edit": {
@@ -100,7 +111,7 @@
       "settings": {
         "image_position": "start",
         "image_ratio": "5 / 4",
-        "color_scheme": "charcoal",
+        "color_scheme": "ivory",
         "eyebrow": "Fit & care",
         "heading": "Find your size in under a minute.",
         "text": "<p>A simple guide to band, cup and body sizes, with measurements in cm and inches, so every order fits the first time.</p>",
@@ -122,10 +133,23 @@
         "padding_top": 88,
         "padding_bottom": 88
       }
+    },
+    "signature": {
+      "type": "eva-marquee",
+      "settings": {
+        "items": "Silk, Lace, Mesh, Made to be seen, Designed to be felt",
+        "speed": 45,
+        "size": "md",
+        "italic": true,
+        "color_scheme": "ivory",
+        "padding_top": 28,
+        "padding_bottom": 28
+      }
     }
   },
   "order": [
     "hero",
+    "signature",
     "categories",
     "best_sellers",
     "silk_edit",

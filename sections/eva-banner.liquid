@@ -41,7 +41,7 @@
 {%- endcapture -%}
 
 <div
-  class="eva-banner eva-scheme-{{ section.settings.color_scheme }}{% if ratio_desktop == 'screen' %} eva-banner--screen-desktop{% endif %}{% if ratio_mobile == 'screen' %} eva-banner--screen-mobile{% endif %}"
+  class="eva-banner eva-scheme-{{ section.settings.color_scheme }}{% if image != blank or video != blank %} eva-on-media-{{ section.settings.media_text }}{% endif %}{% if ratio_desktop == 'screen' %} eva-banner--screen-desktop{% endif %}{% if ratio_mobile == 'screen' %} eva-banner--screen-mobile{% endif %}"
   style="{{ banner_style | strip }}"
 >
   <div class="eva-banner__media">
@@ -137,13 +137,45 @@
 
   <div class="eva-banner__content eva-banner__content--{{ section.settings.content_position }}">
     <div class="eva-page">
-      <div class="eva-banner__inner">
+      {%- liquid
+        # The hero's headline rises in word by word; plain text only, so markup such as <em> stays intact.
+        assign split_heading = false
+        if is_hero and section.settings.heading != blank
+          unless section.settings.heading contains '<'
+            assign split_heading = true
+            assign heading_words = section.settings.heading | split: ' '
+            assign follow_delay = heading_words.size | times: 70 | plus: 320
+          endunless
+        endif
+      -%}
+      <div
+        class="eva-banner__inner"
+        {% unless is_hero %}
+          data-eva-reveal
+        {% endunless %}
+      >
         {%- if section.settings.eyebrow != blank -%}
-          <p class="eva-eyebrow eva-banner__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+          <p class="eva-eyebrow eva-banner__eyebrow{% if is_hero %} eva-rise{% endif %}">{{ section.settings.eyebrow | escape }}</p>
         {%- endif -%}
 
-        {%- if section.settings.heading != blank -%}
-          <{{ heading_tag }} class="eva-heading eva-heading--{{ section.settings.heading_size }} eva-banner__heading">
+        {%- if split_heading -%}
+          <{{ heading_tag }}
+            class="eva-heading eva-heading--{{ section.settings.heading_size }} eva-banner__heading"
+            aria-label="{{ section.settings.heading | escape_once }}"
+          >
+            {%- for word in heading_words -%}
+              <span
+                class="eva-split__word"
+                style="--eva-word: {{ forloop.index }};"
+                aria-hidden="true"
+              >
+                {{- word -}}
+              </span>
+              {%- unless forloop.last %} {% endunless -%}
+            {%- endfor -%}
+          </{{ heading_tag }}>
+        {%- elsif section.settings.heading != blank -%}
+          <{{ heading_tag }} class="eva-heading eva-heading--{{ section.settings.heading_size }} eva-banner__heading{% if is_hero %} eva-rise{% endif %}">
             {{- section.settings.heading -}}
           </{{ heading_tag }}>
         {%- elsif is_hero -%}
@@ -151,13 +183,23 @@
         {%- endif -%}
 
         {%- if section.settings.text != blank -%}
-          <p class="eva-body eva-banner__text">{{ section.settings.text }}</p>
+          <p
+            class="eva-body eva-banner__text{% if is_hero %} eva-rise{% endif %}"
+            {% if split_heading %}
+              style="--eva-rise-delay: {{ follow_delay }}ms;"
+            {% endif %}
+          >
+            {{ section.settings.text }}
+          </p>
         {%- endif -%}
 
         {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
           <a
             href="{{ section.settings.button_link }}"
-            class="eva-button eva-button--{{ section.settings.button_style }} eva-banner__button"
+            class="eva-button eva-button--{{ section.settings.button_style }} eva-banner__button{% if is_hero %} eva-rise{% endif %}"
+            {% if split_heading %}
+              style="--eva-rise-delay: {{ follow_delay | plus: 120 }}ms;"
+            {% endif %}
           >
             {{- section.settings.button_label | escape -}}
           </a>
@@ -191,8 +233,8 @@
     content: '';
     position: absolute;
     inset: 0;
-    background-color: var(--eva-bg);
-    opacity: var(--eva-overlay, 0);
+    background-color: var(--eva-veil, var(--eva-bg));
+    opacity: max(var(--eva-overlay, 0), var(--eva-overlay-min, 0));
     pointer-events: none;
   }
 
@@ -382,6 +424,17 @@
     },
     {
       "type": "select",
+      "id": "media_text",
+      "label": "t:eva.settings.media_text",
+      "info": "t:eva.info.media_text",
+      "options": [
+        { "value": "light", "label": "t:eva.options.light_text" },
+        { "value": "dark", "label": "t:eva.options.dark_text" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "select",
       "id": "color_scheme",
       "label": "t:eva.settings.color_scheme",
       "info": "t:eva.info.banner_color_scheme",
@@ -392,7 +445,7 @@
         { "value": "charcoal", "label": "t:eva.options.charcoal" },
         { "value": "wine", "label": "t:eva.options.wine" }
       ],
-      "default": "plum"
+      "default": "ivory"
     },
     {
       "type": "header",
@@ -471,7 +524,8 @@
       "settings": {
         "ratio_desktop": "3 / 1",
         "overlay_opacity": 0,
-        "color_scheme": "blush",
+        "media_text": "dark",
+        "color_scheme": "ivory",
         "eyebrow": "Best sellers",
         "heading": "The Eva Bodysuit",
         "heading_size": "lg",

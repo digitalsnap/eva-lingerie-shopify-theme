@@ -6,7 +6,7 @@
 -%}
 
 <div
-  class="eva-collection-banner eva-scheme-{{ section.settings.color_scheme }}"
+  class="eva-collection-banner eva-scheme-{{ section.settings.color_scheme }}{% if image != blank %} eva-on-media-{{ section.settings.media_text }}{% endif %}"
   style="--eva-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"
 >
   {%- if image != blank -%}
@@ -60,8 +60,8 @@
     content: '';
     position: absolute;
     inset: 0;
-    background-color: var(--eva-bg);
-    opacity: var(--eva-overlay, 0);
+    background-color: var(--eva-veil, var(--eva-bg));
+    opacity: max(var(--eva-overlay, 0), var(--eva-overlay-min, 0));
   }
 
   .eva-collection-banner__image {
@@ -131,6 +131,17 @@
     },
     {
       "type": "select",
+      "id": "media_text",
+      "label": "t:eva.settings.media_text",
+      "info": "t:eva.info.media_text",
+      "options": [
+        { "value": "light", "label": "t:eva.options.light_text" },
+        { "value": "dark", "label": "t:eva.options.dark_text" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "select",
       "id": "color_scheme",
       "label": "t:eva.settings.color_scheme",
       "info": "t:eva.info.banner_color_scheme",
@@ -140,7 +151,7 @@
         { "value": "plum", "label": "t:eva.options.plum" },
         { "value": "charcoal", "label": "t:eva.options.charcoal" }
       ],
-      "default": "blush"
+      "default": "ivory"
     }
   ],
   "presets": [

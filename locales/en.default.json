@@ -561,6 +561,20 @@
       "wrong": "That password isn’t right. Please try again.",
       "signup_success": "Thank you. We’ll let you know when we open.",
       "owner_html": "Are you the store owner? <a href=\"{{ link }}\">Log in here</a>"
+    },
+    "marquee": {
+      "pause": "Pause moving text"
+    },
+    "welcome": {
+      "hide_teaser": "Hide the welcome offer",
+      "close": "Close",
+      "error": "Please enter a valid email address.",
+      "privacy": "Privacy policy",
+      "no_thanks": "No thanks",
+      "copy": "Copy",
+      "copied": "Copied",
+      "applied": "Applied to your bag.",
+      "start_shopping": "Start shopping"
     }
   }
 }

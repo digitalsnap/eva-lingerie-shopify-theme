@@ -5,7 +5,10 @@
   style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-media-ratio: {{ section.settings.image_ratio }};"
 >
   <div class="eva-page eva-media-text__grid eva-media-text__grid--image-{{ section.settings.image_position }}">
-    <div class="eva-media-text__media eva-media">
+    <div
+      class="eva-media-text__media eva-media"
+      data-eva-reveal
+    >
       {%- if image != blank -%}
         {{
           image
@@ -20,7 +23,10 @@
       {%- endif -%}
     </div>
 
-    <div class="eva-media-text__content">
+    <div
+      class="eva-media-text__content"
+      data-eva-reveal
+    >
       {%- if section.settings.eyebrow != blank -%}
         <p class="eva-eyebrow">{{ section.settings.eyebrow | escape }}</p>
       {%- endif -%}
@@ -128,7 +134,7 @@
         { "value": "plum", "label": "t:eva.options.plum" },
         { "value": "charcoal", "label": "t:eva.options.charcoal" }
       ],
-      "default": "charcoal"
+      "default": "ivory"
     },
     {
       "type": "header",

@@ -50,7 +50,7 @@
           role="list"
         >
           {%- for set_product in set_products limit: limit -%}
-            <li>
+            <li data-eva-reveal>
               {%- render 'eva-product-card', product: set_product, sizes: sizes, colour_display: 'names' -%}
             </li>
           {%- endfor -%}

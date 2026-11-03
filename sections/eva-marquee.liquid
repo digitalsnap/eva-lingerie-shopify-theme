@@ -1,0 +1,278 @@
+{%- liquid
+  assign items = section.settings.items | split: ','
+  assign item_chars = section.settings.items | remove: ',' | size
+  assign item_chars = items.size | times: 4 | plus: item_chars | at_least: 1
+  assign repeats = 160.0 | divided_by: item_chars | ceil | at_least: 3 | at_most: 24
+  # The same pace whatever the words: the speed setting is the time the default words take.
+  assign duration = section.settings.speed | times: repeats | times: item_chars | divided_by: 210.0 | round: 1
+-%}
+
+{%- comment -%}
+  Each half of the loop repeats the words until it is wider than a large screen (about 160
+  characters; the loop is seamless only then). Screen readers hear them once; the repeats only
+  show while moving.
+{%- endcomment -%}
+{%- capture marquee_items -%}
+  {%- for repeat in (1..repeats) -%}
+    {%- for item in items -%}
+      {%- assign item_text = item | strip -%}
+      {%- if item_text != blank -%}
+        <li
+          class="eva-marquee__item{% if repeat > 1 %} eva-marquee__repeat{% endif %}"
+          {% if repeat > 1 %}
+            aria-hidden="true"
+          {% endif %}
+        >
+          {{- item_text | escape -}}
+        </li>
+        <li
+          class="eva-marquee__mark{% if repeat > 1 %} eva-marquee__repeat{% elsif forloop.last %} eva-marquee__tail{% endif %}"
+          aria-hidden="true"
+        >
+          ✦
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if marquee_items != blank -%}
+  <div
+    class="eva-marquee eva-section eva-scheme-{{ section.settings.color_scheme }} eva-marquee--{{ section.settings.size }}{% if section.settings.italic %} eva-marquee--italic{% endif %}"
+    style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-marquee-duration: {{ duration }}s;"
+  >
+    <div class="eva-marquee__viewport">
+      <div class="eva-marquee__track">
+        <ul
+          class="eva-marquee__group"
+          role="list"
+        >
+          {{- marquee_items -}}
+        </ul>
+        {%- comment -%} A second copy makes the loop seamless; screen readers hear the words once. {%- endcomment -%}
+        <ul
+          class="eva-marquee__group eva-marquee__group--copy"
+          role="list"
+          aria-hidden="true"
+        >
+          {{- marquee_items -}}
+        </ul>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="eva-icon-button eva-marquee__toggle"
+      data-eva-marquee-toggle
+      aria-label="{{ 'eva.marquee.pause' | t }}"
+      aria-pressed="false"
+    >
+      {%- render 'eva-icon', icon: 'pause', class: 'eva-marquee__icon-pause' -%}
+      {%- render 'eva-icon', icon: 'play', class: 'eva-marquee__icon-play' -%}
+    </button>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-marquee {
+    position: relative;
+    overflow: hidden;
+    border-block: 1px solid var(--eva-line);
+  }
+
+  .eva-marquee__viewport {
+    overflow: hidden;
+  }
+
+  .eva-marquee__track {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .eva-marquee__group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 clamp(1.25rem, 3vw, 2.5rem);
+    margin: 0;
+    padding: 0 var(--eva-gutter);
+    list-style: none;
+  }
+
+  /* At rest only the first copy shows, without its trailing separator. */
+  .eva-marquee__group--copy,
+  .eva-marquee__repeat,
+  .eva-marquee__tail {
+    display: none;
+  }
+
+  html.eva-motion :is(.eva-marquee__repeat, .eva-marquee__tail) {
+    display: list-item;
+  }
+
+  .eva-marquee__item {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .eva-marquee--italic .eva-marquee__item {
+    font-style: italic;
+  }
+
+  .eva-marquee--sm .eva-marquee__item {
+    font-size: clamp(1.25rem, 1rem + 0.8vw, 1.75rem);
+  }
+
+  .eva-marquee--md .eva-marquee__item {
+    font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.75rem);
+  }
+
+  .eva-marquee--lg .eva-marquee__item {
+    font-size: clamp(2.25rem, 1.4rem + 3vw, 4.5rem);
+  }
+
+  .eva-marquee__mark {
+    font-size: 0.75rem;
+    color: var(--eva-eyebrow);
+  }
+
+  .eva-marquee__toggle {
+    display: none;
+    position: absolute;
+    inset-block-end: 0.25rem;
+    inset-inline-end: 0.5rem;
+    color: var(--eva-muted);
+  }
+
+  .eva-marquee__toggle .eva-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .eva-marquee.is-paused .eva-marquee__icon-pause,
+  .eva-marquee:not(.is-paused) .eva-marquee__icon-play {
+    display: none;
+  }
+
+  /* Moving only with motion on: a slow, continuous, seamless loop that pauses on hover. */
+  @keyframes eva-marquee {
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  html.eva-motion .eva-marquee__track {
+    justify-content: flex-start;
+    width: max-content;
+    animation: eva-marquee var(--eva-marquee-duration, 40s) linear infinite;
+  }
+
+  html.eva-motion .eva-marquee__group {
+    flex-wrap: nowrap;
+    padding: 0;
+    padding-inline-end: clamp(1.25rem, 3vw, 2.5rem);
+  }
+
+  html.eva-motion .eva-marquee__group--copy {
+    display: flex;
+  }
+
+  html.eva-motion .eva-marquee:is(:hover, .is-paused) .eva-marquee__track {
+    animation-play-state: paused;
+  }
+
+  html.eva-motion-js .eva-marquee__toggle {
+    display: inline-flex;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.marquee",
+  "class": "eva-marquee-section",
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "items",
+      "label": "t:eva.settings.marquee_items",
+      "info": "t:eva.info.marquee_items",
+      "default": "Silk, Lace, Mesh, Made to be seen, Designed to be felt"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "t:eva.settings.marquee_speed",
+      "info": "t:eva.info.marquee_speed",
+      "min": 20,
+      "max": 90,
+      "step": 5,
+      "unit": "s",
+      "default": 45
+    },
+    {
+      "type": "select",
+      "id": "size",
+      "label": "t:eva.settings.text_size",
+      "options": [
+        { "value": "sm", "label": "t:eva.options.small" },
+        { "value": "md", "label": "t:eva.options.medium" },
+        { "value": "lg", "label": "t:eva.options.large" }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "checkbox",
+      "id": "italic",
+      "label": "t:eva.settings.italic",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" },
+        { "value": "wine", "label": "t:eva.options.wine" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.marquee"
+    }
+  ]
+}
+{% endschema %}

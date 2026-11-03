@@ -1265,7 +1265,9 @@
       "main_list_collections": "Eva collections list",
       "cart_drawer": "Eva cart drawer",
       "predictive_search": "Eva predictive search",
-      "password": "Eva password page"
+      "password": "Eva password page",
+      "marquee": "Eva moving text",
+      "welcome_offer": "Eva welcome offer"
     },
     "blocks": {
       "footer_menu": "Footer menu",
@@ -1291,7 +1293,10 @@
       "filtering": "Filtering and sorting",
       "size_guide": "Size guide",
       "cart_info": "Discount codes, order notes and accelerated checkout buttons follow Theme settings > Cart.",
-      "apps": "Apps"
+      "apps": "Apps",
+      "motion": "Motion",
+      "welcome_info": "Sign-ups are saved as customers with email marketing consent and tagged newsletter and welcome-offer, ready for Shopify Email or Klaviyo automations.",
+      "welcome_timing": "Timing"
     },
     "settings": {
       "ivory": "Ivory (page ground)",
@@ -1374,7 +1379,29 @@
       "show_author": "Show author",
       "collections_per_page": "Collections per page",
       "show_newsletter": "Show email sign-up",
-      "chat_drawer": "Dock Shopify Inbox chat in a side drawer"
+      "chat_drawer": "Dock Shopify Inbox chat in a side drawer",
+      "media_text": "Text over media",
+      "layout": "Layout",
+      "cta_label": "Link label",
+      "marquee_items": "Words",
+      "marquee_speed": "Loop duration",
+      "text_size": "Text size",
+      "italic": "Italic",
+      "motion": "Subtle motion",
+      "motion_ambient": "Gentle zoom as large images appear",
+      "welcome_enabled": "Show welcome offer",
+      "discount_code": "Discount code",
+      "consent": "Consent text",
+      "one_tap": "Show one-tap unlock",
+      "one_tap_label": "One-tap label",
+      "success_heading": "Unlocked heading",
+      "success_text": "Unlocked text",
+      "welcome_delay": "Open after",
+      "welcome_auto_mobile": "Open automatically on phones",
+      "welcome_teaser": "Show corner tab",
+      "welcome_teaser_label": "Tab label",
+      "welcome_dismiss_days": "Ask again after",
+      "welcome_hide_subscribers": "Hide for subscribed customers"
     },
     "info": {
       "gold_text": "Antique gold fails contrast on ivory and blush, so small gold text there uses this darker tone.",
@@ -1406,7 +1433,18 @@
       "recommendation_intent": "Complementary products are chosen in the Search & Discovery app.",
       "quick_add": "Leave off with the Eva product page: quick add reads the original Horizon product layout, which Eva replaces.",
       "password_text": "Defaults to the message set in Online Store > Preferences > Password protection.",
-      "chat_drawer": "Turn on only if Shopify Inbox is installed. When off, Inbox shows its usual floating chat and every page loads less code."
+      "chat_drawer": "Turn on only if Shopify Inbox is installed. When off, Inbox shows its usual floating chat and every page loads less code.",
+      "media_text": "Light text with a soft shade suits darker images; dark text suits pale images. Light text always keeps a light shade so it stays readable.",
+      "cta_label": "Shown on large tiles. Leave blank to hide.",
+      "marquee_items": "Separate with commas.",
+      "marquee_speed": "Seconds the default words take to loop; longer or shorter words keep the same pace. Higher is calmer.",
+      "motion": "Gentle reveals as sections scroll into view and animated hero text. Turned off for visitors who ask their device to reduce motion.",
+      "motion_ambient": "Hero and category images ease in from a slight zoom, once.",
+      "discount_code": "Create this code first in Shopify admin > Discounts. The offer hides while this is blank.",
+      "consent": "Required by email marketing laws in many regions.",
+      "one_tap": "Reveals the code without asking for an email.",
+      "welcome_delay": "Also opens when the visitor reaches the footer, whichever comes first.",
+      "welcome_auto_mobile": "Off by default: full-screen pop-ups on phones can hurt search rankings. Phones see the corner tab instead."
     },
     "options": {
       "ivory": "Ivory",
@@ -1437,7 +1475,12 @@
       "complementary": "Complementary",
       "related": "Related",
       "narrow": "Narrow",
-      "wide": "Wide"
+      "wide": "Wide",
+      "light_text": "Light",
+      "dark_text": "Dark",
+      "layout_large": "Large, uniform",
+      "layout_row": "Compact row",
+      "small": "Small"
     }
   }
 }

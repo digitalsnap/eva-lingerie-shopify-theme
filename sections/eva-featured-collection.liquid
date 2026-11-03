@@ -13,7 +13,10 @@
   style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-columns: {{ columns }}; --eva-card-ratio: {{ section.settings.image_ratio }};"
 >
   <div class="eva-page">
-    <div class="eva-featured__header">
+    <div
+      class="eva-featured__header"
+      data-eva-reveal
+    >
       {%- if section.settings.eyebrow != blank -%}
         <p class="eva-eyebrow">{{ section.settings.eyebrow | escape }}</p>
       {%- endif -%}
@@ -47,7 +50,7 @@
     >
       {%- if collection != blank and collection.products_count > 0 -%}
         {%- for product in collection.products limit: limit -%}
-          <li>
+          <li data-eva-reveal>
             {%- render 'eva-product-card',
               product: product,
               sizes: sizes,
@@ -57,7 +60,7 @@
         {%- endfor -%}
       {%- else -%}
         {%- for i in (1..limit) -%}
-          <li>{%- render 'eva-product-card', product: nil, placeholder_index: i -%}</li>
+          <li data-eva-reveal>{%- render 'eva-product-card', product: nil, placeholder_index: i -%}</li>
         {%- endfor -%}
       {%- endif -%}
     </ul>

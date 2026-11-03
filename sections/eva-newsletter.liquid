@@ -8,7 +8,10 @@
   class="eva-newsletter eva-section eva-scheme-{{ section.settings.color_scheme }}"
   style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px;"
 >
-  <div class="eva-page eva-newsletter__inner">
+  <div
+    class="eva-page eva-newsletter__inner"
+    data-eva-reveal
+  >
     {%- if section.settings.heading != blank -%}
       <h2 class="eva-heading eva-heading--xs">{{ section.settings.heading }}</h2>
     {%- endif -%}

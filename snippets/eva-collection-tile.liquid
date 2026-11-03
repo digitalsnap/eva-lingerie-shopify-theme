@@ -8,6 +8,8 @@
   @param {object} [image] - An image object; a placeholder is shown when blank.
   @param {string} [sizes] - The image `sizes` attribute.
   @param {string} [loading] - 'lazy' (default) or 'eager'.
+  @param {string} [size] - 'regular' (default) or 'large' (bigger name, room for a call to action).
+  @param {string} [cta] - A short call to action under the name, e.g. "Shop now".
 
   @example
   {% render 'eva-collection-tile', url: collection.url, label: collection.title, image: collection.featured_image %}
@@ -20,15 +22,15 @@
 
 <a
   href="{{ url }}"
-  class="eva-tile__link"
+  class="eva-tile__link{% if size == 'large' %} eva-tile__link--large{% endif %}"
 >
   <span class="eva-tile__media eva-media">
     {%- if image != blank -%}
       {{
         image
-        | image_url: width: 1200
+        | image_url: width: 1800
         | image_tag:
-          widths: '300, 450, 600, 800, 1000, 1200',
+          widths: '300, 450, 600, 800, 1000, 1200, 1500, 1800',
           sizes: tile_sizes,
           loading: tile_loading,
           alt: ''
@@ -37,7 +39,17 @@
       {{- 'collection-1' | placeholder_svg_tag: 'eva-placeholder' -}}
     {%- endif -%}
   </span>
-  <span class="eva-tile__label eva-heading">{{ label | escape }}</span>
+  <span class="eva-tile__text">
+    <span class="eva-tile__label eva-heading">{{ label | escape }}</span>
+    {%- if cta != blank -%}
+      <span
+        class="eva-tile__cta"
+        aria-hidden="true"
+      >
+        {{- cta | escape -}}
+      </span>
+    {%- endif -%}
+  </span>
 </a>
 
 {% stylesheet %}
@@ -64,11 +76,11 @@
   }
 
   .eva-tile__media img {
-    transition: transform 0.6s var(--eva-ease);
+    transition: transform 1.2s var(--eva-ease);
   }
 
   .eva-tile__link:hover .eva-tile__media img {
-    transform: scale(1.03);
+    transform: scale(1.04);
   }
 
   .eva-tile__link:focus-visible {
@@ -76,15 +88,50 @@
     outline-offset: 3px;
   }
 
-  .eva-tile__label {
+  .eva-tile__text {
     position: absolute;
     inset-inline: 1rem;
     inset-block-end: clamp(1.25rem, 3vw, 2rem);
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+    text-align: center;
+  }
+
+  .eva-tile__label {
     font-size: clamp(1.5rem, 0.9rem + 1.6vw, 2.5rem);
     line-height: 1.1;
     letter-spacing: 0.04em;
-    text-align: center;
     text-transform: uppercase;
+  }
+
+  .eva-tile__link--large .eva-tile__text {
+    inset-block-end: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .eva-tile__link--large .eva-tile__label {
+    font-size: clamp(2.25rem, 1.2rem + 2.8vw, 4rem);
+    letter-spacing: 0.06em;
+  }
+
+  .eva-tile__link--large .eva-tile__media::after {
+    background: linear-gradient(to top, rgb(43 34 38 / 0.5), rgb(43 34 38 / 0) 55%);
+  }
+
+  .eva-tile__cta {
+    padding-block-end: 0.25rem;
+    border-block-end: 1px solid currentcolor;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.6875rem;
+    letter-spacing: var(--eva-tracking-label);
+    text-transform: uppercase;
+    transition: border-color var(--eva-duration) var(--eva-ease);
+  }
+
+  .eva-tile__link:hover .eva-tile__cta {
+    border-color: transparent;
   }
 {% endstylesheet %}

@@ -451,6 +451,8 @@ class EvaRecommendations extends HTMLElement {
 
       this.replaceChildren(...fresh.childNodes);
       this.hidden = false;
+      // Lets assets/eva-motion.js reveal the new cards.
+      this.dispatchEvent(new CustomEvent('eva:content-loaded', { bubbles: true }));
     } catch {
       // Recommendations are optional; the section simply stays hidden.
     }

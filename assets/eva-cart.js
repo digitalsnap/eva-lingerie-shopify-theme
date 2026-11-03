@@ -19,19 +19,25 @@ class EvaCart extends HTMLElement {
   /** @type {string | null} */
   #linesUpdateEvent = null;
 
+  /** @type {string | null} */
+  #discountUpdateEvent = null;
+
   connectedCallback() {
     this.addEventListener('click', this.#onClick);
     this.addEventListener('change', this.#onChange);
     this.addEventListener('input', this.#onInput);
     this.addEventListener('submit', this.#onSubmit);
 
-    // The cart drawer follows changes made elsewhere: add to bag, other tabs (back/forward cache), apps.
+    // The cart drawer follows changes made elsewhere: add to bag, the welcome offer's code, other
+    // tabs (back/forward cache), apps.
     if (this.hasAttribute('data-listen-updates')) {
       import('@shopify/events')
         .then(({ StandardEvents }) => {
           if (!this.isConnected) return;
           this.#linesUpdateEvent = StandardEvents.cartLinesUpdate;
+          this.#discountUpdateEvent = StandardEvents.cartDiscountUpdate;
           document.addEventListener(this.#linesUpdateEvent, this.#onExternalUpdate);
+          document.addEventListener(this.#discountUpdateEvent, this.#onExternalUpdate);
         })
         .catch(() => {});
       window.addEventListener('pageshow', this.#onPageShow);
@@ -44,6 +50,7 @@ class EvaCart extends HTMLElement {
     this.removeEventListener('input', this.#onInput);
     this.removeEventListener('submit', this.#onSubmit);
     if (this.#linesUpdateEvent) document.removeEventListener(this.#linesUpdateEvent, this.#onExternalUpdate);
+    if (this.#discountUpdateEvent) document.removeEventListener(this.#discountUpdateEvent, this.#onExternalUpdate);
     window.removeEventListener('pageshow', this.#onPageShow);
     for (const timer of this.#timers.values()) window.clearTimeout(timer);
   }

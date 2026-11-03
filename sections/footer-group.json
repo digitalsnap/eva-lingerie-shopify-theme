@@ -56,9 +56,33 @@
         "padding_top": 64,
         "padding_bottom": 40
       }
+    },
+    "welcome_offer": {
+      "type": "eva-welcome-offer",
+      "settings": {
+        "enabled": true,
+        "discount_code": "WELCOME10",
+        "eyebrow": "Welcome to Eva",
+        "heading": "Enjoy 10% off your first order",
+        "text": "Join the list for early access to new drops and private offers.",
+        "placeholder": "Your email",
+        "button_label": "Unlock my 10%",
+        "consent": "By signing up you agree to receive marketing emails from Eva Lingerie. Unsubscribe at any time.",
+        "one_tap": true,
+        "one_tap_label": "Unlock without signing up",
+        "success_heading": "Your 10% is unlocked",
+        "success_text": "Use this code at checkout on your first order.",
+        "delay": 8,
+        "auto_open_mobile": false,
+        "show_teaser": true,
+        "teaser_label": "Unlock 10% off",
+        "dismiss_days": 14,
+        "hide_for_customers": true
+      }
     }
   },
   "order": [
-    "footer"
+    "footer",
+    "welcome_offer"
   ]
 }

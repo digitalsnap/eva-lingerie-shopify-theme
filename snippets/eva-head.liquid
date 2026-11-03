@@ -26,4 +26,21 @@
 
 {{ 'eva-base.css' | asset_url | stylesheet_tag: preload: true }}
 
+{%- if settings.eva_motion -%}
+  {%- comment -%}
+    Decided before first paint so nothing jumps: visitors who ask for reduced motion get none.
+    assets/eva-motion.js adds the scroll reveals; the drift and the headline rise are CSS.
+  {%- endcomment -%}
+  <script>
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('eva-motion'{% if settings.eva_motion_ambient %}, 'eva-ambient'{% endif %});
+    }
+  </script>
+  <script
+    src="{{ 'eva-motion.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{%- endif -%}
+
 {%- render 'eva-tokens' -%}
