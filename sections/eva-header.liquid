@@ -9,8 +9,8 @@
 -%}
 
 {%- comment -%}
-  Reuses Horizon's cart-icon (live cart count), #search-modal and dialog-component, and opens the
-  Eva cart drawer (#eva-cart-drawer), so this header adds no JavaScript of its own. The id and
+  Reuses Horizon's cart-icon (live cart count) and dialog-component, and opens the Eva search
+  panel (#eva-search) and cart drawer (#eva-cart-drawer), so this header adds no JavaScript of its own. The id and
   data-sticky-state attribute keep `--header-height` consumers working.
 {%- endcomment -%}
 <script
@@ -123,7 +123,8 @@
         <button
           type="button"
           class="eva-icon-button"
-          on:click="#search-modal/showDialog"
+          on:click="#eva-search/showDialog"
+          aria-controls="eva-search"
           aria-haspopup="dialog"
           aria-label="{{ 'eva.header.search' | t }}"
         >

@@ -512,7 +512,14 @@
       "type_article": "Journal",
       "type_page": "Page",
       "no_results": "Nothing found for “{{ terms }}”",
-      "no_results_hint": "Check the spelling, or try a broader word such as bra or set."
+      "no_results_hint": "Check the spelling, or try a broader word such as bra or set.",
+      "close": "Close search",
+      "suggestions": "Suggestions",
+      "products": "Products",
+      "more_results": "Journal and pages",
+      "view_all": "View all results for “{{ terms }}”",
+      "live_count": "[count] results found",
+      "live_none": "No results found"
     },
     "not_found": {
       "eyebrow": "Error 404"
@@ -544,6 +551,16 @@
       "comment_moderated": "Thank you. Your comment will appear once it has been approved.",
       "comment_posted": "Thank you. Your comment has been posted.",
       "moderation_note": "Comments are approved before they appear."
+    },
+    "password": {
+      "enter": "Enter using password",
+      "dialog_title": "Enter the store",
+      "close": "Close",
+      "password_label": "Password",
+      "submit": "Enter",
+      "wrong": "That password isn’t right. Please try again.",
+      "signup_success": "Thank you. We’ll let you know when we open.",
+      "owner_html": "Are you the store owner? <a href=\"{{ link }}\">Log in here</a>"
     }
   }
 }

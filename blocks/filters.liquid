@@ -8,6 +8,11 @@
 {%- enddoc -%}
 
 {% render 'theme-drawer-styles' %}
+<script
+  src="{{ 'theme-drawer.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
 {% render 'swatch-styles' %}
 {% render 'pills-styles' %}
 

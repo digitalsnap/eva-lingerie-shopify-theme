@@ -36,7 +36,9 @@
   <body class="eva page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
 
-    {% render 'chat-drawer' %}
+    {%- if settings.eva_chat_drawer -%}
+      {% render 'chat-drawer' %}
+    {%- endif -%}
 
     <div class="page-wrapper">
       <div id="header-group">
@@ -62,9 +64,11 @@
     {%- if settings.cart_type == 'drawer' and template.name != 'cart' -%}
       {% section 'eva-cart-drawer' %}
     {%- endif -%}
-    {% render 'theme-drawer' %}
+    {%- if settings.eva_chat_drawer -%}
+      {% render 'theme-drawer' %}
+    {%- endif -%}
 
-    {% render 'search-modal' %}
+    {% render 'eva-search-modal' %}
 
     {% if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add-modal' %}

@@ -169,6 +169,17 @@
       },
       {
         "type": "header",
+        "content": "t:eva.content.apps"
+      },
+      {
+        "type": "checkbox",
+        "id": "eva_chat_drawer",
+        "label": "t:eva.settings.chat_drawer",
+        "info": "t:eva.info.chat_drawer",
+        "default": false
+      },
+      {
+        "type": "header",
         "content": "t:eva.content.social"
       },
       {

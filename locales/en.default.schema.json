@@ -1263,7 +1263,9 @@
       "main_blog": "Eva journal",
       "main_article": "Eva article",
       "main_list_collections": "Eva collections list",
-      "cart_drawer": "Eva cart drawer"
+      "cart_drawer": "Eva cart drawer",
+      "predictive_search": "Eva predictive search",
+      "password": "Eva password page"
     },
     "blocks": {
       "footer_menu": "Footer menu",
@@ -1288,7 +1290,8 @@
       "category_pills": "Category pills",
       "filtering": "Filtering and sorting",
       "size_guide": "Size guide",
-      "cart_info": "Discount codes, order notes and accelerated checkout buttons follow Theme settings > Cart."
+      "cart_info": "Discount codes, order notes and accelerated checkout buttons follow Theme settings > Cart.",
+      "apps": "Apps"
     },
     "settings": {
       "ivory": "Ivory (page ground)",
@@ -1369,7 +1372,9 @@
       "show_tags": "Show topic filter",
       "articles_per_page": "Articles per page",
       "show_author": "Show author",
-      "collections_per_page": "Collections per page"
+      "collections_per_page": "Collections per page",
+      "show_newsletter": "Show email sign-up",
+      "chat_drawer": "Dock Shopify Inbox chat in a side drawer"
     },
     "info": {
       "gold_text": "Antique gold fails contrast on ivory and blush, so small gold text there uses this darker tone.",
@@ -1399,7 +1404,9 @@
       "accordion_content": "Shown for products without the metafield. The row is hidden when both are empty.",
       "recommendations_metafield": "A product list metafield, for example custom.complete_the_set. Products without it fall back to Shopify's recommendations.",
       "recommendation_intent": "Complementary products are chosen in the Search & Discovery app.",
-      "quick_add": "Leave off with the Eva product page: quick add reads the original Horizon product layout, which Eva replaces."
+      "quick_add": "Leave off with the Eva product page: quick add reads the original Horizon product layout, which Eva replaces.",
+      "password_text": "Defaults to the message set in Online Store > Preferences > Password protection.",
+      "chat_drawer": "Turn on only if Shopify Inbox is installed. When off, Inbox shows its usual floating chat and every page loads less code."
     },
     "options": {
       "ivory": "Ivory",

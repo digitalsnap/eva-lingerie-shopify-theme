@@ -1,8 +1,18 @@
 {%- comment -%}
-  overflow-list.css is only used by Horizon menus and swatches, which no storefront template
-  renders any more; the theme editor still gets it for Horizon sections added there.
+  Horizon's base.css now only styles Horizon sections and blocks (added in the theme editor) and
+  Horizon's chat drawer; everything the Eva storefront needs at first paint is in eva-base.css.
+  So on the storefront it loads without blocking rendering. The theme editor keeps it blocking,
+  where Horizon sections are previewed, along with overflow-list.css for Horizon menus and swatches.
 {%- endcomment -%}
 {%- if request.design_mode -%}
   {{ 'overflow-list.css' | asset_url | preload_tag: as: 'style' }}
+  {{ 'base.css' | asset_url | stylesheet_tag }}
+{%- else -%}
+  <link
+    rel="stylesheet"
+    href="{{ 'base.css' | asset_url }}"
+    media="print"
+    onload="this.media='all'"
+  >
+  <noscript>{{ 'base.css' | asset_url | stylesheet_tag }}</noscript>
 {%- endif -%}
-{{ 'base.css' | asset_url | stylesheet_tag: preload: true }}

@@ -1,0 +1,171 @@
+{%- doc -%}
+  The search panel opened from the header (#eva-search). A plain search form that works without
+  JavaScript; <eva-predictive-search> adds live results from Shopify's Predictive Search API,
+  rendered by sections/eva-predictive-search.liquid. Rendered once from layout/theme.liquid.
+
+  @example
+  {% render 'eva-search-modal' %}
+{%- enddoc -%}
+
+<script
+  src="{{ 'eva-search.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<dialog-component id="eva-search">
+  <dialog
+    ref="dialog"
+    class="eva-search-modal eva-scheme-ivory"
+    aria-label="{{ 'eva.search.label' | t }}"
+    scroll-lock
+  >
+    <eva-predictive-search
+      class="eva-page eva-search-modal__inner"
+      data-url="{{ routes.predictive_search_url }}"
+      data-section="eva-predictive-search"
+      data-label-count="{{ 'eva.search.live_count' | t | escape }}"
+      data-label-none="{{ 'eva.search.live_none' | t | escape }}"
+    >
+      <form
+        action="{{ routes.search_url }}"
+        method="get"
+        role="search"
+        class="eva-search-modal__form"
+      >
+        {%- render 'eva-icon', icon: 'search', class: 'eva-search-modal__icon' -%}
+        <label
+          for="EvaSearchModalInput"
+          class="visually-hidden"
+        >
+          {{- 'eva.search.label' | t -}}
+        </label>
+        <input
+          id="EvaSearchModalInput"
+          class="eva-search-modal__input"
+          type="search"
+          name="q"
+          placeholder="{{ 'eva.search.placeholder' | t | escape }}"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          autofocus
+        >
+        <input
+          type="hidden"
+          name="options[prefix]"
+          value="last"
+        >
+        <button
+          type="button"
+          class="eva-icon-button"
+          on:click="dialog-component/closeDialog"
+          aria-label="{{ 'eva.search.close' | t }}"
+        >
+          {%- render 'eva-icon', icon: 'close' -%}
+        </button>
+      </form>
+
+      <div
+        class="eva-search-modal__results"
+        data-results
+      ></div>
+      <p
+        id="EvaSearchModalStatus"
+        class="visually-hidden"
+        role="status"
+        data-status
+      ></p>
+    </eva-predictive-search>
+  </dialog>
+</dialog-component>
+
+{% stylesheet %}
+  /* Pinned to the top and only as tall as its content (a modal dialog otherwise stretches to max-height). */
+  .eva-search-modal {
+    inset-block: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: fit-content;
+    max-height: min(90dvh, 48rem);
+    margin: 0;
+    padding: 0 0 1.5rem;
+    border: 0;
+    border-block-end: 1px solid var(--eva-line);
+    overflow-y: auto;
+  }
+
+  .eva-search-modal::backdrop {
+    background-color: rgb(43 34 38 / 0.45);
+  }
+
+  .eva-search-modal[open] {
+    animation: eva-search-in 0.25s var(--eva-ease);
+  }
+
+  .eva-search-modal.dialog-closing {
+    animation: eva-search-out 0.2s var(--eva-ease) forwards;
+  }
+
+  @keyframes eva-search-in {
+    from {
+      translate: 0 -100%;
+    }
+  }
+
+  @keyframes eva-search-out {
+    to {
+      translate: 0 -100%;
+    }
+  }
+
+  .eva-search-modal__form {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: var(--eva-header-height);
+    border-block-end: 1px solid var(--eva-line);
+  }
+
+  .eva-search-modal__icon {
+    flex: none;
+    color: var(--eva-muted);
+  }
+
+  /* Two classes: outranks base.css's input background once it loads. */
+  .eva-search-modal .eva-search-modal__input {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0 0.5rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: clamp(1.375rem, 1rem + 1vw, 1.75rem);
+  }
+
+  .eva-search-modal__input::placeholder {
+    color: var(--eva-grey);
+    opacity: 1;
+  }
+
+  .eva-search-modal__input:focus-visible {
+    outline: none;
+  }
+
+  .eva-search-modal__form:focus-within {
+    border-block-end-color: var(--eva-charcoal);
+  }
+
+  .eva-search-modal__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+
+  .eva-search-modal__results[aria-busy='true'] {
+    opacity: 0.6;
+  }
+{% endstylesheet %}

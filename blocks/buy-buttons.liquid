@@ -2,6 +2,11 @@
 
 
 {% render 'theme-drawer-styles' %}
+<script
+  src="{{ 'theme-drawer.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
 {% liquid
   assign block_settings = block.settings
   assign product = closest.product

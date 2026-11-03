@@ -1,0 +1,260 @@
+{%- comment -%}
+  Live search results, rendered by Shopify's Predictive Search API for the Eva search panel
+  (snippets/eva-search-modal.liquid fetches /search/suggest?section_id=eva-predictive-search).
+  Not added to templates.
+{%- endcomment -%}
+
+{%- if predictive_search.performed -%}
+  {%- liquid
+    assign products = predictive_search.resources.products
+    assign queries = predictive_search.resources.queries
+    assign collections = predictive_search.resources.collections
+    assign pages = predictive_search.resources.pages
+    assign articles = predictive_search.resources.articles
+    assign total = products.size | plus: queries.size | plus: collections.size | plus: pages.size | plus: articles.size
+    assign encoded_terms = predictive_search.terms | url_encode
+  -%}
+
+  <div
+    class="eva-predictive"
+    data-predictive-results
+    data-count="{{ total }}"
+  >
+    {%- if total == 0 -%}
+      <p class="eva-body eva-predictive__empty">{{ 'eva.search.no_results' | t: terms: predictive_search.terms }}</p>
+    {%- else -%}
+      <div class="eva-predictive__grid">
+        {%- if queries.size > 0 or collections.size > 0 or pages.size > 0 or articles.size > 0 -%}
+          <div class="eva-predictive__side">
+            {%- if queries.size > 0 -%}
+              <div class="eva-predictive__group">
+                <h2 class="eva-eyebrow">{{ 'eva.search.suggestions' | t }}</h2>
+                <ul role="list">
+                  {%- for query in queries -%}
+                    <li>
+                      <a
+                        href="{{ query.url }}"
+                        class="eva-predictive__link"
+                      >
+                        {{- query.styled_text -}}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            {%- if collections.size > 0 -%}
+              <div class="eva-predictive__group">
+                <h2 class="eva-eyebrow">{{ 'eva.collection.categories' | t }}</h2>
+                <ul role="list">
+                  {%- for collection in collections -%}
+                    <li>
+                      <a
+                        href="{{ collection.url }}"
+                        class="eva-predictive__link"
+                      >
+                        {{- collection.title | escape -}}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            {%- if articles.size > 0 or pages.size > 0 -%}
+              <div class="eva-predictive__group">
+                <h2 class="eva-eyebrow">{{ 'eva.search.more_results' | t }}</h2>
+                <ul role="list">
+                  {%- for article in articles -%}
+                    <li>
+                      <a
+                        href="{{ article.url }}"
+                        class="eva-predictive__link"
+                      >
+                        {{- article.title | escape -}}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                  {%- for page in pages -%}
+                    <li>
+                      <a
+                        href="{{ page.url }}"
+                        class="eva-predictive__link"
+                      >
+                        {{- page.title | escape -}}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if products.size > 0 -%}
+          <div class="eva-predictive__products">
+            <h2 class="eva-eyebrow">{{ 'eva.search.products' | t }}</h2>
+            <ul
+              class="eva-predictive__product-list"
+              role="list"
+            >
+              {%- for product in products -%}
+                <li>
+                  <a
+                    href="{{ product.url }}"
+                    class="eva-predictive__product"
+                  >
+                    <span class="eva-predictive__image eva-media">
+                      {%- if product.featured_media != blank -%}
+                        {{
+                          product.featured_media.preview_image
+                          | image_url: width: 400
+                          | image_tag: widths: '160, 240, 320, 400', sizes: '(min-width: 990px) 12vw, 30vw', loading: 'lazy', alt: ''
+                        }}
+                      {%- else -%}
+                        {{- 'product-apparel-1' | placeholder_svg_tag: 'eva-placeholder' -}}
+                      {%- endif -%}
+                    </span>
+                    <span class="eva-predictive__title">{{ product.title | escape }}</span>
+                    <span class="eva-predictive__price">
+                      {%- if product.price_varies -%}
+                        {%- assign price_min = product.price_min | money -%}
+                        {{- 'eva.card.from_price' | t: price: price_min -}}
+                      {%- else -%}
+                        {{- product.price | money -}}
+                      {%- endif -%}
+                    </span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <a
+        href="{{ routes.search_url }}?q={{ encoded_terms }}&amp;options%5Bprefix%5D=last"
+        class="eva-button eva-button--outline eva-predictive__all"
+      >
+        {{- 'eva.search.view_all' | t: terms: predictive_search.terms -}}
+      </a>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-predictive {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-block: 1.5rem 0.5rem;
+  }
+
+  .eva-predictive__grid {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .eva-predictive__side {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+  }
+
+  .eva-predictive__group ul,
+  .eva-predictive__product-list {
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-predictive__link {
+    display: inline-block;
+    padding-block: 0.375rem;
+    font-size: 0.9375rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-predictive__link mark {
+    background: none;
+    color: inherit;
+    font-weight: var(--font-subheading--weight);
+  }
+
+  .eva-predictive__link:hover,
+  .eva-predictive__link:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: currentcolor;
+    text-underline-offset: 0.3em;
+  }
+
+  .eva-predictive__product-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem 0.75rem;
+  }
+
+  .eva-predictive__product {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-predictive__image {
+    aspect-ratio: 3 / 4;
+    margin-block-end: 0.375rem;
+  }
+
+  .eva-predictive__title {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+
+  .eva-predictive__price {
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.8125rem;
+  }
+
+  .eva-predictive__product:hover .eva-predictive__title,
+  .eva-predictive__product:focus-visible .eva-predictive__title {
+    text-decoration: underline;
+    text-decoration-color: currentcolor;
+  }
+
+  .eva-predictive__product:focus-visible {
+    outline: 2px solid currentcolor;
+    outline-offset: 3px;
+  }
+
+  .eva-predictive__all {
+    align-self: center;
+  }
+
+  @media screen and (min-width: 990px) {
+    .eva-predictive__grid {
+      grid-template-columns: minmax(12rem, 1fr) 3fr;
+      gap: 3rem;
+    }
+
+    .eva-predictive__grid:has(> :only-child) {
+      grid-template-columns: 1fr;
+    }
+
+    .eva-predictive__product-list {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.predictive_search",
+  "class": "eva-predictive-search-section",
+  "settings": []
+}
+{% endschema %}

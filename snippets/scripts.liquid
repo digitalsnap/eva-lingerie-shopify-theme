@@ -1,7 +1,5 @@
 {% doc %}
   Renders all global scripts, module preloads, and importmaps for the theme.
-
-  @param {object} [product] - The product object, available on product pages.
 {% enddoc %}
 
 <script type="importmap">
@@ -17,7 +15,6 @@
       "@theme/morph": "{{ 'morph.js' | asset_url }}",
       "@theme/performance": "{{ 'performance.js' | asset_url }}",
       "@theme/product-form": "{{ 'product-form.js' | asset_url }}",
-      "@theme/recently-viewed-products": "{{ 'recently-viewed-products.js' | asset_url }}",
       "@theme/scrolling": "{{ 'scrolling.js' | asset_url }}",
       "@theme/section-renderer": "{{ 'section-renderer.js' | asset_url }}",
       "@theme/section-hydration": "{{ 'section-hydration.js' | asset_url }}",
@@ -63,6 +60,10 @@
   </script>
 {% endif %}
 
+{%- comment -%}
+  Preload only what every page imports (dialog.js and cart-icon.js pull in these). Horizon's
+  section-rendering, morph and scrolling modules are fetched on demand by the Horizon code that uses them.
+{%- endcomment -%}
 <link
   rel="modulepreload"
   href="{{ 'utilities.js' | asset_url }}"
@@ -73,43 +74,21 @@
   href="{{ 'component.js' | asset_url }}"
   fetchpriority="low"
 >
-<link
-  rel="modulepreload"
-  href="{{ 'section-renderer.js' | asset_url }}"
-  fetchpriority="low"
->
-<link
-  rel="modulepreload"
-  href="{{ 'section-hydration.js' | asset_url }}"
-  fetchpriority="low"
->
-<link
-  rel="modulepreload"
-  href="{{ 'morph.js' | asset_url }}"
-  fetchpriority="low"
->
 
 
 <link
   rel="modulepreload"
-  href="{{ 'focus.js' | asset_url }}"
+  href="{{ 'scroll-container.js' | asset_url }}"
   fetchpriority="low"
 >
-<link
-  rel="modulepreload"
-  href="{{ 'recently-viewed-products.js' | asset_url }}"
-  fetchpriority="low"
->
-<link
-  rel="modulepreload"
-  href="{{ 'scrolling.js' | asset_url }}"
-  fetchpriority="low"
->
-<link
-  rel="modulepreload"
-  href="{{ 'events.js' | asset_url }}"
-  fetchpriority="low"
->
+{%- comment -%} focus.js is only imported by theme-drawer.js, which loads with the chat drawer. {%- endcomment -%}
+{%- if settings.eva_chat_drawer -%}
+  <link
+    rel="modulepreload"
+    href="{{ 'focus.js' | asset_url }}"
+    fetchpriority="low"
+  >
+{%- endif -%}
 {%- liquid
   # Horizon's product, collection and editorial modules. Every storefront template is built from
   # eva-* sections, which render none of their elements, so the storefront skips them: about 200 KB
@@ -187,12 +166,6 @@
   ></script>
 {% endif %}
 
-{% if template == 'product' or template.name == 'product' or request.page_type == 'product' %}
-  <script type="module">
-    import { RecentlyViewed } from '@theme/recently-viewed-products';
-    RecentlyViewed.addProduct('{{ product.id }}');
-  </script>
-{% endif %}
 
 <script
   src="{{ 'auto-close-details.js' | asset_url }}"

@@ -10,7 +10,7 @@
 {%- enddoc -%}
 
 <a
-  class="skip-to-content-link button-secondary"
+  class="skip-to-content-link eva-button eva-button--outline"
   href="{{ href }}"
 >
   {{ text | t }}
@@ -31,6 +31,9 @@
     inset-inline-start: var(--margin-lg);
     top: var(--margin-lg);
     background-color: var(--color-background);
+    /* Set explicitly: the link sits outside any Eva colour scheme, so the button's hover colour
+       would otherwise match this background. */
+    color: var(--color-foreground);
     box-shadow: 0 0 0 var(--focus-outline-offset) var(--color-background);
   }
 {% endstylesheet %}
