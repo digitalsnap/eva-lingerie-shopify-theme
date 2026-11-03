@@ -29,6 +29,12 @@
   {% render 'slideshow', slides: slides, slide_count: collection.products.size, ref: 'mobileSlideshow' %}
 {%- enddoc -%}
 
+<script
+  src="{{ 'slideshow.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {%- liquid
   assign class = class | strip | strip_newlines
   assign animate_arrows = animate_arrows | default: true, allow_false: true

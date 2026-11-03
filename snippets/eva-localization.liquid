@@ -1,0 +1,116 @@
+{%- doc -%}
+  Country/currency and language selector built on Shopify's localization form. Works without
+  JavaScript: visitors choose, then press Update (no auto-submit, so focus never jumps on change).
+  Renders nothing when the store sells to a single country in a single language.
+
+  @param {string} id_prefix - Unique prefix for the form control ids, e.g. 'EvaFooter'.
+
+  @example
+  {% render 'eva-localization', id_prefix: 'EvaFooter' %}
+{%- enddoc -%}
+
+{%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
+  {%- assign form_id = id_prefix | append: '-LocalizationForm' -%}
+  {%- form 'localization', id: form_id, class: 'eva-localization' -%}
+    {%- if localization.available_countries.size > 1 -%}
+      <div class="eva-localization__field">
+        <label
+          for="{{ id_prefix }}-Country"
+          class="eva-localization__label"
+        >
+          {{- 'eva.localization.country' | t -}}
+        </label>
+        <select
+          id="{{ id_prefix }}-Country"
+          name="country_code"
+          class="eva-localization__select"
+        >
+          {%- for country in localization.available_countries -%}
+            <option
+              value="{{ country.iso_code }}"
+              {% if country.iso_code == localization.country.iso_code %}
+                selected
+              {% endif %}
+            >
+              {{- country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol -}})
+            </option>
+          {%- endfor -%}
+        </select>
+      </div>
+    {%- endif -%}
+
+    {%- if localization.available_languages.size > 1 -%}
+      <div class="eva-localization__field">
+        <label
+          for="{{ id_prefix }}-Language"
+          class="eva-localization__label"
+        >
+          {{- 'eva.localization.language' | t -}}
+        </label>
+        <select
+          id="{{ id_prefix }}-Language"
+          name="language_code"
+          class="eva-localization__select"
+        >
+          {%- for language in localization.available_languages -%}
+            <option
+              value="{{ language.iso_code }}"
+              lang="{{ language.iso_code }}"
+              {% if language.iso_code == localization.language.iso_code %}
+                selected
+              {% endif %}
+            >
+              {{- language.endonym_name | capitalize -}}
+            </option>
+          {%- endfor -%}
+        </select>
+      </div>
+    {%- endif -%}
+
+    <button
+      type="submit"
+      class="eva-link eva-localization__submit"
+    >
+      {{- 'eva.localization.update' | t -}}
+    </button>
+  {%- endform -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-localization {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .eva-localization__field {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .eva-localization__label {
+    font-size: 0.6875rem;
+    letter-spacing: var(--eva-tracking-label);
+    text-transform: uppercase;
+    color: var(--eva-muted, currentcolor);
+  }
+
+  .eva-localization__select {
+    min-height: 2.75rem;
+    padding-inline: 0.75rem 2rem;
+    border: 1px solid var(--eva-line, currentcolor);
+    border-radius: 0;
+    background-color: transparent;
+    color: inherit;
+    font-size: 0.8125rem;
+  }
+
+  .eva-localization__submit {
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+{% endstylesheet %}

@@ -6,6 +6,13 @@
   @param {object} [block] - The block object
 {%- enddoc -%}
 
+<script
+  src="{{ 'quick-add.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+{% render 'product-form-scripts' %}
+
 {% liquid
   assign product_form_id = 'QuickAdd-ProductForm-' | append: product.id | append: '-' | append: block.id
   assign add_to_cart_text = 'actions.add' | t

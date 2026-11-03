@@ -10,6 +10,12 @@
   @param {string} [product_view_context] - The context in which the product card is being rendered. Used for standard events.
 {%- enddoc -%}
 
+<script
+  src="{{ 'product-card.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {% assign block_settings = block.settings %}
 
 {% if request.visual_preview_mode %}

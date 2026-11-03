@@ -20,6 +20,16 @@
   fetchpriority="low"
 ></script>
 
+{%- comment -%}
+  Results arrive after load, so scripts inside them never run: the collection and page
+  carousels in the results need slideshow.js loaded up front.
+{%- endcomment -%}
+<script
+  src="{{ 'slideshow.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 <dialog-component
   id="search-modal"
   class="search-modal"

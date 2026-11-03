@@ -125,18 +125,18 @@
   href="{{ 'events.js' | asset_url }}"
   fetchpriority="low"
 >
-<script
-  src="{{ 'overflow-list.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-{% if settings.quick_add or settings.mobile_quick_add %}
-  <script
-    src="{{ 'quick-add.js' | asset_url }}"
-    type="module"
-    fetchpriority="low"
-  ></script>
-{% endif %}
+{%- liquid
+  # Product, collection and editorial modules. The Eva home page renders none of their elements,
+  # so it skips them: about 200 KB of JavaScript the browser no longer parses there. Every Horizon
+  # snippet or block that renders one of these elements also loads its module (a module URL only
+  # runs once), so Horizon sections added to the home page keep working. The theme editor injects
+  # sections without running their scripts, so it always gets the full set.
+  assign load_horizon_modules = true
+  if template.name == 'index' and request.design_mode == false
+    assign load_horizon_modules = false
+  endif
+-%}
+
 {% if settings.show_cart_note %}
   <script
     src="{{ 'cart-note.js' | asset_url }}"
@@ -157,78 +157,9 @@
   type="module"
   fetchpriority="low"
 ></script>
-<script
-  src="{{ 'variant-picker.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'product-card.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'product-form.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'fly-to-cart.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'accordion-custom.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'media.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'product-price.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'product-sku.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'product-inventory.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'show-more.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'slideshow.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'layered-slideshow.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
+{%- comment -%} Cart drawer contents (quantity selectors, disclosure tooltips) can appear on any page. {%- endcomment -%}
 <script
   src="{{ 'anchored-popover.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'floating-panel.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'video-background.js' | asset_url }}"
   type="module"
   fetchpriority="low"
 ></script>
@@ -237,35 +168,53 @@
   type="module"
   fetchpriority="low"
 ></script>
-<script
-  src="{{ 'media-gallery.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'rte-formatter.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'volume-pricing.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'price-per-item.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'volume-pricing-info.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
 
-{% if localization.available_countries.size > 1 or localization.available_languages.size > 1 %}
+{% if load_horizon_modules %}
   <script
-    src="{{ 'localization.js' | asset_url }}"
+    src="{{ 'overflow-list.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  {% if settings.quick_add or settings.mobile_quick_add %}
+    <script
+      src="{{ 'quick-add.js' | asset_url }}"
+      type="module"
+      fetchpriority="low"
+    ></script>
+  {% endif %}
+  <script
+    src="{{ 'variant-picker.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'product-card.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  {% render 'product-form-scripts' %}
+  <script
+    src="{{ 'accordion-custom.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'show-more.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'floating-panel.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'video-background.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'rte-formatter.js' | asset_url }}"
     type="module"
     fetchpriority="low"
   ></script>

@@ -14,6 +14,12 @@
   {% render 'background-media', background_media: background_media, background_video: background_video, background_video_position: background_video_position, background_image: background_image, background_image_position: background_image_position, placeholder: placeholder %}
 {%- enddoc -%}
 
+<script
+  src="{{ 'video-background.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {% if background_media == 'video' %}
   {% liquid
     assign video_classes = 'video-background video-background--' | append: background_video_position

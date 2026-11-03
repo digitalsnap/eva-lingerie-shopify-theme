@@ -1,0 +1,248 @@
+{%- doc -%}
+  Lean product card: image, title, colour names ("Noir · Blush · +2 more") and price. No JavaScript.
+  The whole card is clickable through the title link, so keyboard users get one tab stop per card.
+  Renders a placeholder card when `product` is blank (theme editor onboarding).
+
+  @param {product} [product] - The product to show.
+  @param {string} [sizes] - The `sizes` attribute for the card image.
+  @param {string} [loading] - 'lazy' (default) or 'eager' for cards in the first viewport.
+  @param {boolean} [show_secondary_image] - Show the second product image on hover. Defaults to false.
+  @param {number} [placeholder_index] - Picks the placeholder illustration (1-4) when `product` is blank.
+
+  @example
+  {% render 'eva-product-card', product: product, sizes: '(min-width: 990px) 25vw, 50vw' %}
+{%- enddoc -%}
+
+{%- liquid
+  assign loading = loading | default: 'lazy'
+  assign sizes = sizes | default: '(min-width: 990px) 25vw, 50vw'
+  assign image_widths = '200, 300, 400, 500, 600, 800, 1000'
+-%}
+
+{%- if product != blank -%}
+  {%- liquid
+    assign media = product.featured_media
+    assign secondary_media = nil
+    if show_secondary_image and product.media.size > 1
+      assign secondary_media = product.media[1]
+    endif
+
+    assign on_sale = false
+    if product.compare_at_price > product.price
+      assign on_sale = true
+    endif
+
+    assign is_new = false
+    if product.tags contains 'new' or product.tags contains 'New'
+      assign is_new = true
+    endif
+
+    assign colour_option = nil
+    for option in product.options_with_values
+      assign option_name = option.name | downcase
+      if option_name == 'color' or option_name == 'colour'
+        assign colour_option = option
+        break
+      endif
+    endfor
+
+    assign price_text = product.price | money
+    if product.price_varies
+      assign price_min = product.price_min | money
+      assign price_text = 'eva.card.from_price' | t: price: price_min
+    endif
+  -%}
+
+  <div class="eva-card{% if secondary_media != blank %} eva-card--has-secondary{% endif %}">
+    <div class="eva-card__media eva-media">
+      {%- if media != blank -%}
+        {{
+          media.preview_image
+          | image_url: width: 1000
+          | image_tag:
+            widths: image_widths,
+            sizes: sizes,
+            loading: loading,
+            class: 'eva-card__image'
+        }}
+        {%- if secondary_media != blank -%}
+          {{
+            secondary_media.preview_image
+            | image_url: width: 1000
+            | image_tag:
+              widths: image_widths,
+              sizes: sizes,
+              loading: 'lazy',
+              alt: '',
+              class: 'eva-card__image eva-card__image--secondary'
+          }}
+        {%- endif -%}
+      {%- else -%}
+        {{- 'product-apparel-1' | placeholder_svg_tag: 'eva-placeholder' -}}
+      {%- endif -%}
+
+      {%- if product.available == false or on_sale or is_new -%}
+        <p class="eva-card__badge">
+          {%- if product.available == false -%}
+            {{- 'eva.card.sold_out' | t -}}
+          {%- elsif on_sale -%}
+            {{- 'eva.card.sale' | t -}}
+          {%- else -%}
+            {{- 'eva.card.new' | t -}}
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+    </div>
+
+    <h3 class="eva-card__title">
+      <a
+        href="{{ product.url }}"
+        class="eva-card__link"
+      >
+        {{- product.title | escape -}}
+      </a>
+    </h3>
+
+    {%- if colour_option != nil and colour_option.values.size > 0 -%}
+      {%- liquid
+        assign shown_colours = colour_option.values | slice: 0, 2
+        assign more_colours = colour_option.values.size | minus: 2
+      -%}
+      <p class="eva-card__colours">
+        <span class="visually-hidden">{{ 'eva.card.colours' | t }}:</span>
+        {%- for colour in shown_colours -%}
+          {{ colour.name | escape }}
+          {%- unless forloop.last %}<span aria-hidden="true"> · </span>{% endunless -%}
+        {%- endfor -%}
+        {%- if more_colours > 0 -%}
+          <span aria-hidden="true"> · </span>{{ 'eva.card.more_colours' | t: count: more_colours }}
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+
+    <p class="eva-card__price">
+      {%- if on_sale -%}
+        <span class="visually-hidden">{{ 'eva.card.sale_price' | t }}</span>
+        <span class="eva-card__price-sale">{{ price_text }}</span>
+        <span class="visually-hidden">{{ 'eva.card.regular_price' | t }}</span>
+        <s class="eva-card__price-compare">{{ product.compare_at_price | money }}</s>
+      {%- else -%}
+        {{ price_text }}
+      {%- endif -%}
+    </p>
+  </div>
+{%- else -%}
+  {%- liquid
+    assign placeholder_number = placeholder_index | default: 1 | minus: 1 | modulo: 4 | plus: 1
+    assign placeholder_name = 'product-apparel-' | append: placeholder_number
+  -%}
+  <div class="eva-card">
+    <div class="eva-card__media eva-media">
+      {{- placeholder_name | placeholder_svg_tag: 'eva-placeholder' -}}
+    </div>
+    <h3 class="eva-card__title">{{ 'eva.card.placeholder_title' | t }}</h3>
+    <p class="eva-card__price">{{ 4900 | money }}</p>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .eva-card__media {
+    aspect-ratio: var(--eva-card-ratio, 3 / 4);
+    margin-block-end: 0.75rem;
+  }
+
+  .eva-card__image {
+    transition: opacity 0.4s var(--eva-ease), transform 0.6s var(--eva-ease);
+  }
+
+  .eva-card__image--secondary {
+    opacity: 0;
+  }
+
+  @media (hover: hover) {
+    .eva-card--has-secondary:hover .eva-card__image--secondary {
+      opacity: 1;
+    }
+
+    .eva-card:not(.eva-card--has-secondary):hover .eva-card__image {
+      transform: scale(1.03);
+    }
+  }
+
+  .eva-card__badge {
+    position: absolute;
+    inset-block-start: 0.75rem;
+    inset-inline-start: 0.75rem;
+    margin: 0;
+    padding: 0.3125rem 0.625rem;
+    background-color: var(--eva-ivory);
+    color: var(--eva-charcoal);
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.625rem;
+    line-height: 1.2;
+    letter-spacing: var(--eva-tracking-label);
+    text-transform: uppercase;
+  }
+
+  .eva-card__title {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-weight: var(--font-body--weight);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    letter-spacing: 0;
+    text-transform: none;
+    color: inherit;
+  }
+
+  .eva-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .eva-card__link:focus-visible {
+    outline: none;
+  }
+
+  .eva-card:has(.eva-card__link:focus-visible) {
+    outline: 2px solid currentcolor;
+    outline-offset: 4px;
+  }
+
+  .eva-card__colours {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--eva-muted, currentcolor);
+  }
+
+  .eva-card__price {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+    margin: 0;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .eva-card__price-compare {
+    color: var(--eva-muted, currentcolor);
+  }
+{% endstylesheet %}

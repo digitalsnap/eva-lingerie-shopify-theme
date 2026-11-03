@@ -1,0 +1,226 @@
+{%- liquid
+  assign social_names = 'Instagram|TikTok|Facebook|Pinterest|YouTube' | split: '|'
+  assign social_urls = settings.eva_social_instagram | append: '|' | append: settings.eva_social_tiktok | append: '|' | append: settings.eva_social_facebook | append: '|' | append: settings.eva_social_pinterest | append: '|' | append: settings.eva_social_youtube | split: '|'
+-%}
+
+<div
+  class="eva-footer eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="eva-page">
+    <div class="eva-footer__menus">
+      {% content_for 'blocks' %}
+    </div>
+
+    <div class="eva-footer__bottom">
+      <p class="eva-footer__copyright eva-caption">
+        &copy; {{ 'now' | date: '%Y' }}
+        {{ shop.name | escape }}.
+        {{ 'eva.footer.rights' | t }}
+      </p>
+
+      {%- if section.settings.show_localization -%}
+        {%- render 'eva-localization', id_prefix: 'EvaFooter' -%}
+      {%- endif -%}
+
+      {%- if social_urls.size > 0 -%}
+        {%- capture social_items -%}
+          {%- for url in social_urls -%}
+            {%- if url != blank -%}
+              <li>
+                <a
+                  href="{{ url }}"
+                  class="eva-footer__link"
+                  rel="me noopener"
+                  target="_blank"
+                >
+                  {{- social_names[forloop.index0] -}}
+                  <span class="visually-hidden"> ({{ 'eva.footer.opens_new_window' | t }})</span>
+                </a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endcapture -%}
+        {%- if social_items != blank -%}
+          <ul
+            class="eva-footer__social"
+            role="list"
+            aria-label="{{ 'eva.footer.social' | t }}"
+          >
+            {{- social_items -}}
+          </ul>
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if section.settings.show_payment_icons and shop.enabled_payment_types.size > 0 -%}
+        <div class="eva-footer__payments">
+          <h2 class="visually-hidden">{{ 'eva.footer.payment_methods' | t }}</h2>
+          <ul
+            class="eva-footer__payment-list"
+            role="list"
+          >
+            {%- for type in shop.enabled_payment_types -%}
+              <li>{{ type | payment_type_svg_tag: class: 'eva-footer__payment-icon' }}</li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .eva-footer__menus {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem 1.5rem;
+  }
+
+  .eva-footer__heading {
+    margin: 0 0 1rem;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: var(--eva-tracking-label);
+    text-transform: uppercase;
+    color: inherit;
+  }
+
+  .eva-footer__links,
+  .eva-footer__social,
+  .eva-footer__payment-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-footer__link {
+    display: inline-block;
+    padding-block: 0.375rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-footer__link:hover,
+  .eva-footer__link:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: currentcolor;
+    text-underline-offset: 0.3em;
+  }
+
+  .eva-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem 2.5rem;
+    margin-block-start: clamp(2.5rem, 5vw, 4rem);
+    padding-block-start: 1.5rem;
+    border-block-start: 1px solid var(--eva-line);
+  }
+
+  .eva-footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.25rem;
+  }
+
+  .eva-footer__payment-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .eva-footer__payment-icon {
+    width: 2.375rem;
+    height: 1.5rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .eva-footer__menus {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.footer",
+  "tag": "div",
+  "class": "eva-footer-section",
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "max_blocks": 4,
+  "blocks": [
+    {
+      "type": "_eva-footer-menu"
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_localization",
+      "label": "t:eva.settings.show_localization",
+      "info": "t:eva.info.show_localization",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "t:eva.settings.show_payment_icons",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" },
+        { "value": "plum", "label": "t:eva.options.plum" },
+        { "value": "charcoal", "label": "t:eva.options.charcoal" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.footer",
+      "blocks": [
+        { "type": "_eva-footer-menu", "settings": { "heading": "Shop" } },
+        { "type": "_eva-footer-menu", "settings": { "heading": "Account" } },
+        { "type": "_eva-footer-menu", "settings": { "heading": "Information" } },
+        { "type": "_eva-footer-menu", "settings": { "heading": "Legal" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,21 @@
+{%- doc -%}
+  Outputs the Eva brand colours from theme settings as CSS custom properties.
+  Rendered once in the layout head by `eva-head`; every eva-* section reads these.
+
+  @example
+  {% render 'eva-tokens' %}
+{%- enddoc -%}
+
+{%- style -%}
+  :root {
+    --eva-ivory: {{ settings.eva_color_ivory }};
+    --eva-blush: {{ settings.eva_color_blush }};
+    --eva-wine: {{ settings.eva_color_wine }};
+    --eva-plum: {{ settings.eva_color_plum }};
+    --eva-charcoal: {{ settings.eva_color_charcoal }};
+    --eva-gold: {{ settings.eva_color_gold }};
+    --eva-gold-text: {{ settings.eva_color_gold_text }};
+    --eva-grey: {{ settings.eva_color_grey }};
+    --eva-border: {{ settings.eva_color_border }};
+  }
+{%- endstyle -%}

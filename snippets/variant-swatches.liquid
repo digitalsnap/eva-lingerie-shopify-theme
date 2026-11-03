@@ -10,6 +10,12 @@
   {% render 'variant-swatches', product_resource: product %}
 {%- enddoc -%}
 
+<script
+  src="{{ 'product-card.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {% render 'swatch-styles' %}
 {% render 'variant-picker-styles' %}
 

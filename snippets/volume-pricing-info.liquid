@@ -15,6 +15,17 @@
   %}
 {% enddoc %}
 
+<script
+  src="{{ 'volume-pricing.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'volume-pricing-info.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {%- liquid
   assign has_quantity_rules = false
   if variant.quantity_rule.min > 1 or variant.quantity_rule.increment > 1 or variant.quantity_rule.max != null

@@ -9,6 +9,12 @@
   @param {string} [more-button-attributes] - The attributes that are applied directly on the more button element.
 {%- enddoc -%}
 
+<script
+  src="{{ 'overflow-list.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 <overflow-list
   {% if ref %}
     ref="{{ ref }}"

@@ -1,0 +1,483 @@
+{%- liquid
+  assign image = section.settings.image
+  assign image_mobile = section.settings.image_mobile
+  assign video = section.settings.video
+
+  # The first section on a template is the hero: it owns the page's h1 and its image is the
+  # Largest Contentful Paint candidate, so it loads eagerly with high priority. Later banners
+  # lazy-load. section.index is nil when rendered outside a template, which counts as "later".
+  assign is_hero = false
+  if section.index == 1
+    assign is_hero = true
+  endif
+
+  if is_hero
+    assign heading_tag = 'h1'
+    assign loading = 'eager'
+    assign fetchpriority = 'high'
+  else
+    assign heading_tag = 'h2'
+    assign loading = 'lazy'
+    assign fetchpriority = 'auto'
+  endif
+
+  # Preloading only helps when one file serves every viewport; with a separate mobile image a
+  # preload would make phones download the desktop file too.
+  assign preload = false
+  if is_hero and image_mobile == blank
+    assign preload = true
+  endif
+
+  assign mobile_widths = '375, 550, 750, 1100, 1500' | split: ', '
+
+  assign ratio_desktop = section.settings.ratio_desktop
+  assign ratio_mobile = section.settings.ratio_mobile
+-%}
+
+{%- capture banner_style -%}
+  {%- unless ratio_desktop == 'screen' %}--eva-ratio-desktop: {{ ratio_desktop }};{% endunless -%}
+  {%- unless ratio_mobile == 'screen' %} --eva-ratio-mobile: {{ ratio_mobile }};{% endunless -%}
+  {{- ' ' -}}--eva-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+{%- endcapture -%}
+
+<div
+  class="eva-banner eva-scheme-{{ section.settings.color_scheme }}{% if ratio_desktop == 'screen' %} eva-banner--screen-desktop{% endif %}{% if ratio_mobile == 'screen' %} eva-banner--screen-mobile{% endif %}"
+  style="{{ banner_style | strip }}"
+>
+  <div class="eva-banner__media">
+    {%- if image != blank -%}
+      <picture>
+        {%- if image_mobile != blank -%}
+          {%- capture mobile_srcset -%}
+            {%- for width in mobile_widths -%}
+              {%- assign width_number = width | plus: 0 -%}
+              {%- if width_number <= image_mobile.width -%}
+                {{- image_mobile | image_url: width: width_number }} {{ width_number }}w,{{ ' ' -}}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endcapture -%}
+          <source
+            media="(max-width: 749px)"
+            srcset="{{ mobile_srcset | strip | remove_last: ',' }}"
+            sizes="100vw"
+            width="{{ image_mobile.width }}"
+            height="{{ image_mobile.height }}"
+          >
+        {%- endif -%}
+        {{
+          image
+          | image_url: width: 3200
+          | image_tag:
+            widths: '375, 550, 750, 1100, 1500, 1800, 2200, 2800, 3200',
+            sizes: '100vw',
+            loading: loading,
+            fetchpriority: fetchpriority,
+            preload: preload,
+            class: 'eva-banner__image'
+        }}
+      </picture>
+    {%- elsif video == blank -%}
+      {{- 'lifestyle-1' | placeholder_svg_tag: 'eva-banner__image eva-placeholder' -}}
+    {%- endif -%}
+
+    {%- if video != blank -%}
+      {%- liquid
+        assign mp4_sources = video.sources | where: 'format', 'mp4' | sort: 'height'
+        assign video_large = mp4_sources | last
+        assign video_small = video_large
+        for source in mp4_sources
+          if source.height <= 720
+            assign video_small = source
+          endif
+        endfor
+      -%}
+      <script
+        src="{{ 'eva-media.js' | asset_url }}"
+        type="module"
+        fetchpriority="low"
+      ></script>
+      <eva-video class="eva-banner__video">
+        <video
+          class="eva-banner__image"
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+          {% if image == blank %}
+            poster="{{ video.preview_image | image_url: width: 1600 }}"
+          {% endif %}
+        >
+          {%- if video_small != video_large -%}
+            <source
+              src="{{ video_small.url }}"
+              type="{{ video_small.mime_type }}"
+              media="(max-width: 749px)"
+            >
+          {%- endif -%}
+          <source
+            src="{{ video_large.url }}"
+            type="{{ video_large.mime_type }}"
+          >
+        </video>
+        <button
+          type="button"
+          class="eva-icon-button eva-banner__video-toggle"
+          data-label-play="{{ 'eva.banner.play_video' | t }}"
+          data-label-pause="{{ 'eva.banner.pause_video' | t }}"
+          aria-label="{{ 'eva.banner.play_video' | t }}"
+          hidden
+        >
+          {%- render 'eva-icon', icon: 'play', class: 'eva-banner__icon-play' -%}
+          {%- render 'eva-icon', icon: 'pause', class: 'eva-banner__icon-pause' -%}
+        </button>
+      </eva-video>
+    {%- endif -%}
+  </div>
+
+  <div class="eva-banner__content eva-banner__content--{{ section.settings.content_position }}">
+    <div class="eva-page">
+      <div class="eva-banner__inner">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="eva-eyebrow eva-banner__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          <{{ heading_tag }} class="eva-heading eva-heading--{{ section.settings.heading_size }} eva-banner__heading">
+            {{- section.settings.heading -}}
+          </{{ heading_tag }}>
+        {%- elsif is_hero -%}
+          <h1 class="visually-hidden">{{ shop.name | escape }}</h1>
+        {%- endif -%}
+
+        {%- if section.settings.text != blank -%}
+          <p class="eva-body eva-banner__text">{{ section.settings.text }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+          <a
+            href="{{ section.settings.button_link }}"
+            class="eva-button eva-button--{{ section.settings.button_style }} eva-banner__button"
+          >
+            {{- section.settings.button_label | escape -}}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .eva-banner {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    aspect-ratio: var(--eva-ratio-mobile, 4 / 5);
+  }
+
+  .eva-banner--screen-mobile {
+    aspect-ratio: auto;
+    min-height: calc(100svh - var(--eva-header-height));
+  }
+
+  .eva-banner__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .eva-banner__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--eva-bg);
+    opacity: var(--eva-overlay, 0);
+    pointer-events: none;
+  }
+
+  .eva-banner__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* With no image set, keep the placeholder on the scheme ground so the text stays readable. */
+  .eva-banner__media .eva-placeholder {
+    background-color: transparent;
+    fill: color-mix(in srgb, var(--eva-fg) 12%, transparent);
+  }
+
+  .eva-banner__video {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .eva-banner__video video {
+    opacity: 0;
+    transition: opacity 0.6s var(--eva-ease);
+  }
+
+  .eva-banner__video[playing] video,
+  .eva-banner__video video[poster] {
+    opacity: 1;
+  }
+
+  .eva-banner__video-toggle {
+    position: absolute;
+    inset-block-end: 1rem;
+    inset-inline-end: 1rem;
+    z-index: 1;
+    color: var(--eva-fg);
+  }
+
+  .eva-banner__video[playing] .eva-banner__icon-play,
+  .eva-banner__video:not([playing]) .eva-banner__icon-pause {
+    display: none;
+  }
+
+  /* The content layer covers the media, so it lets clicks through to the video control;
+     its own links stay clickable. */
+  .eva-banner__content {
+    flex: 1;
+    display: flex;
+    padding-block: clamp(2.5rem, 7vw, 5rem);
+    pointer-events: none;
+  }
+
+  .eva-banner__inner :is(a, button) {
+    pointer-events: auto;
+  }
+
+  .eva-banner__content--center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .eva-banner__content--bottom {
+    align-items: flex-end;
+    text-align: center;
+  }
+
+  .eva-banner__content--bottom-start {
+    align-items: flex-end;
+    text-align: start;
+  }
+
+  .eva-banner__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-inline-size: 40rem;
+  }
+
+  :is(.eva-banner__content--center, .eva-banner__content--bottom) .eva-banner__inner {
+    align-items: center;
+    margin-inline: auto;
+  }
+
+  .eva-banner__content--bottom-start .eva-banner__inner {
+    align-items: flex-start;
+  }
+
+  /* On imagery the eyebrow uses the text colour: antique gold is not legible over photographs. */
+  .eva-banner__eyebrow {
+    color: inherit;
+  }
+
+  .eva-banner__heading {
+    max-inline-size: 11em;
+  }
+
+  .eva-banner__text {
+    max-inline-size: 32rem;
+  }
+
+  .eva-banner__button {
+    margin-block-start: 0.75rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .eva-banner {
+      aspect-ratio: var(--eva-ratio-desktop, 16 / 9);
+    }
+
+    .eva-banner--screen-mobile {
+      min-height: 0;
+    }
+
+    .eva-banner--screen-desktop {
+      aspect-ratio: auto;
+      min-height: calc(100svh - var(--eva-header-height));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.banner",
+  "class": "eva-banner-section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:eva.content.media"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:eva.settings.image",
+      "info": "t:eva.info.banner_image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:eva.settings.image_mobile",
+      "info": "t:eva.info.image_mobile"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "t:eva.settings.video",
+      "info": "t:eva.info.banner_video"
+    },
+    {
+      "type": "select",
+      "id": "ratio_desktop",
+      "label": "t:eva.settings.ratio_desktop",
+      "options": [
+        { "value": "16 / 9", "label": "16:9" },
+        { "value": "21 / 9", "label": "21:9" },
+        { "value": "3 / 1", "label": "3:1" },
+        { "value": "screen", "label": "t:eva.options.full_screen" }
+      ],
+      "default": "16 / 9"
+    },
+    {
+      "type": "select",
+      "id": "ratio_mobile",
+      "label": "t:eva.settings.ratio_mobile",
+      "options": [
+        { "value": "4 / 5", "label": "4:5" },
+        { "value": "1 / 1", "label": "1:1" },
+        { "value": "3 / 4", "label": "3:4" },
+        { "value": "screen", "label": "t:eva.options.full_screen" }
+      ],
+      "default": "4 / 5"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:eva.settings.overlay_opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "info": "t:eva.info.banner_color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" },
+        { "value": "plum", "label": "t:eva.options.plum" },
+        { "value": "charcoal", "label": "t:eva.options.charcoal" },
+        { "value": "wine", "label": "t:eva.options.wine" }
+      ],
+      "default": "plum"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.content"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "t:eva.settings.content_position",
+      "options": [
+        { "value": "center", "label": "t:eva.options.center" },
+        { "value": "bottom", "label": "t:eva.options.bottom" },
+        { "value": "bottom-start", "label": "t:eva.options.bottom_left" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:eva.settings.eyebrow",
+      "default": "The Silk Edit"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:eva.settings.heading",
+      "info": "t:eva.info.heading_italic",
+      "default": "Made to be seen, designed to be felt."
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "t:eva.settings.heading_size",
+      "options": [
+        { "value": "xl", "label": "t:eva.options.extra_large" },
+        { "value": "lg", "label": "t:eva.options.large" },
+        { "value": "md", "label": "t:eva.options.medium" }
+      ],
+      "default": "xl"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "text",
+      "label": "t:eva.settings.text"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:eva.settings.button_label",
+      "default": "Shop the edit"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "t:eva.settings.button_link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "t:eva.settings.button_style",
+      "info": "t:eva.info.button_style",
+      "options": [
+        { "value": "outline", "label": "t:eva.options.outline" },
+        { "value": "primary", "label": "t:eva.options.primary_wine" },
+        { "value": "gold", "label": "t:eva.options.gold" }
+      ],
+      "default": "outline"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.presets.hero"
+    },
+    {
+      "name": "t:eva.presets.feature_banner",
+      "settings": {
+        "ratio_desktop": "3 / 1",
+        "overlay_opacity": 0,
+        "color_scheme": "blush",
+        "eyebrow": "Best sellers",
+        "heading": "The Eva Bodysuit",
+        "heading_size": "lg",
+        "button_label": "View collection"
+      }
+    }
+  ]
+}
+{% endschema %}

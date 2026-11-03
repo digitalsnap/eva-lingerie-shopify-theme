@@ -1,0 +1,31 @@
+{%- doc -%}
+  Renders one of the small line icons used by Eva sections as inline SVG.
+  Icons are decorative: the surrounding control must carry the accessible name.
+
+  @param {string} icon - Icon name: 'menu', 'close', 'search', 'account', 'bag', 'chevron', 'play' or 'pause'.
+  @param {string} [class] - Extra classes for the svg element.
+
+  @example
+  {% render 'eva-icon', icon: 'search' %}
+{%- enddoc -%}
+
+{%- capture classes -%}eva-icon{% if class != blank %} {{ class }}{% endif %}{%- endcapture -%}
+
+{%- case icon -%}
+  {%- when 'menu' -%}
+    <svg class="{{ classes }}" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M2.5 6.5h15M2.5 13.5h15"/></svg>
+  {%- when 'close' -%}
+    <svg class="{{ classes }}" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M4.5 4.5l11 11M15.5 4.5l-11 11"/></svg>
+  {%- when 'search' -%}
+    <svg class="{{ classes }}" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="8.75" cy="8.75" r="5.75"/><path d="M13 13l4.5 4.5"/></svg>
+  {%- when 'account' -%}
+    <svg class="{{ classes }}" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><circle cx="10" cy="6.5" r="3.25"/><path d="M3.5 17.5c.8-3.4 3.4-5.25 6.5-5.25s5.7 1.85 6.5 5.25"/></svg>
+  {%- when 'bag' -%}
+    <svg class="{{ classes }}" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"><path d="M4.25 6.75h11.5l-.9 10.75h-9.7z"/><path d="M7.5 6.75V5.5a2.5 2.5 0 0 1 5 0v1.25"/></svg>
+  {%- when 'chevron' -%}
+    <svg class="{{ classes }}" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg>
+  {%- when 'play' -%}
+    <svg class="{{ classes }}" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor"><path d="M7 5.25v9.5L15 10z"/></svg>
+  {%- when 'pause' -%}
+    <svg class="{{ classes }}" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7.25 5.5v9M12.75 5.5v9"/></svg>
+{%- endcase -%}

@@ -1,0 +1,29 @@
+{%- doc -%}
+  Eva head assets: font preconnect and preloads, the Eva base stylesheet and brand tokens.
+  Rendered after Horizon's stylesheets so Eva rules win at equal specificity.
+
+  Only the heading and subheading fonts are preloaded: they are the two faces used above the fold
+  (hero headline; announcement, navigation, eyebrow and buttons), so the browser fetches them
+  alongside the CSS instead of after it.
+
+  @example
+  {% render 'eva-head' %}
+{%- enddoc -%}
+
+<link
+  rel="preconnect"
+  href="https://fonts.shopifycdn.com"
+  crossorigin
+>
+
+{%- unless settings.type_heading_font.system? -%}
+  {{ settings.type_heading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
+{%- endunless -%}
+
+{%- unless settings.type_subheading_font.system? -%}
+  {{ settings.type_subheading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
+{%- endunless -%}
+
+{{ 'eva-base.css' | asset_url | stylesheet_tag: preload: true }}
+
+{%- render 'eva-tokens' -%}

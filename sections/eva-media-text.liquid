@@ -1,0 +1,210 @@
+{%- assign image = section.settings.image -%}
+
+<div
+  class="eva-media-text eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-media-ratio: {{ section.settings.image_ratio }};"
+>
+  <div class="eva-page eva-media-text__grid eva-media-text__grid--image-{{ section.settings.image_position }}">
+    <div class="eva-media-text__media eva-media">
+      {%- if image != blank -%}
+        {{
+          image
+          | image_url: width: 1600
+          | image_tag:
+            widths: '375, 550, 750, 1000, 1200, 1600',
+            sizes: '(min-width: 750px) 50vw, 100vw',
+            loading: 'lazy'
+        }}
+      {%- else -%}
+        {{- 'lifestyle-2' | placeholder_svg_tag: 'eva-placeholder' -}}
+      {%- endif -%}
+    </div>
+
+    <div class="eva-media-text__content">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eva-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.heading != blank -%}
+        <h2 class="eva-heading eva-heading--md">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.text != blank -%}
+        <div class="eva-body eva-rte eva-media-text__text">{{ section.settings.text }}</div>
+      {%- endif -%}
+
+      {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+        <a
+          href="{{ section.settings.button_link }}"
+          class="eva-button eva-button--{{ section.settings.button_style }} eva-media-text__button"
+        >
+          {{- section.settings.button_label | escape -}}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .eva-media-text__grid {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .eva-media-text__media {
+    aspect-ratio: var(--eva-media-ratio, 5 / 4);
+  }
+
+  .eva-media-text__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    max-inline-size: 30rem;
+  }
+
+  .eva-media-text__text {
+    color: var(--eva-muted, currentcolor);
+  }
+
+  .eva-media-text__button {
+    margin-block-start: 0.5rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .eva-media-text__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(2rem, 5vw, 4.5rem);
+    }
+
+    .eva-media-text__grid--image-end .eva-media-text__media {
+      order: 2;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.media_text",
+  "class": "eva-media-text-section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:eva.settings.image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "t:eva.settings.image_position",
+      "options": [
+        { "value": "start", "label": "t:eva.options.left" },
+        { "value": "end", "label": "t:eva.options.right" }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "t:eva.settings.image_ratio",
+      "options": [
+        { "value": "5 / 4", "label": "5:4" },
+        { "value": "1 / 1", "label": "1:1" },
+        { "value": "4 / 5", "label": "4:5" }
+      ],
+      "default": "5 / 4"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" },
+        { "value": "plum", "label": "t:eva.options.plum" },
+        { "value": "charcoal", "label": "t:eva.options.charcoal" }
+      ],
+      "default": "charcoal"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:eva.settings.eyebrow",
+      "default": "Fit & care"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:eva.settings.heading",
+      "info": "t:eva.info.heading_italic",
+      "default": "Find your size in under a minute."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:eva.settings.text",
+      "default": "<p>A simple guide to band, cup and body sizes, with measurements in cm and inches, so every order fits the first time.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:eva.settings.button_label",
+      "default": "Size guide"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "t:eva.settings.button_link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "t:eva.settings.button_style",
+      "info": "t:eva.info.button_style",
+      "options": [
+        { "value": "outline", "label": "t:eva.options.outline" },
+        { "value": "primary", "label": "t:eva.options.primary_wine" },
+        { "value": "gold", "label": "t:eva.options.gold" }
+      ],
+      "default": "outline"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.media_text"
+    }
+  ]
+}
+{% endschema %}

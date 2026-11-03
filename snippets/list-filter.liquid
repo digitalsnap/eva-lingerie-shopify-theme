@@ -10,6 +10,17 @@
   @param {boolean} [in_drawer] - Whether the filter is in a drawer
 {%- enddoc -%}
 
+<script
+  src="{{ 'show-more.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'floating-panel.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {% render 'variant-picker-styles' %}
 
 {% liquid

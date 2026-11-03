@@ -1,0 +1,203 @@
+{%- liquid
+  assign collection = section.settings.collection
+  assign columns = section.settings.columns | plus: 0
+  assign limit = section.settings.products_to_show
+  assign heading_id = 'EvaFeaturedHeading-' | append: section.id
+
+  assign card_vw = 100 | divided_by: columns
+  assign sizes = '(min-width: 990px) ' | append: card_vw | append: 'vw, 50vw'
+-%}
+
+<div
+  class="eva-featured eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-columns: {{ columns }}; --eva-card-ratio: {{ section.settings.image_ratio }};"
+>
+  <div class="eva-page">
+    <div class="eva-featured__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eva-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      <h2
+        id="{{ heading_id }}"
+        class="eva-heading eva-heading--sm"
+      >
+        {%- if section.settings.heading != blank -%}
+          {{- section.settings.heading -}}
+        {%- else -%}
+          {{- collection.title | default: shop.name | escape -}}
+        {%- endif -%}
+      </h2>
+
+      {%- if section.settings.link_label != blank and collection != blank -%}
+        <a
+          href="{{ collection.url }}"
+          class="eva-link"
+        >
+          {{- section.settings.link_label | escape -}}
+          <span class="visually-hidden">: {{ collection.title | escape }}</span>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <ul
+      class="eva-featured__grid"
+      role="list"
+      aria-labelledby="{{ heading_id }}"
+    >
+      {%- if collection != blank and collection.products_count > 0 -%}
+        {%- for product in collection.products limit: limit -%}
+          <li>
+            {%- render 'eva-product-card',
+              product: product,
+              sizes: sizes,
+              show_secondary_image: section.settings.show_secondary_image
+            -%}
+          </li>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..limit) -%}
+          <li>{%- render 'eva-product-card', product: nil, placeholder_index: i -%}</li>
+        {%- endfor -%}
+      {%- endif -%}
+    </ul>
+  </div>
+</div>
+
+{% stylesheet %}
+  .eva-featured__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-block-end: clamp(1.75rem, 4vw, 2.75rem);
+    text-align: center;
+  }
+
+  .eva-featured__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 990px) {
+    .eva-featured__grid {
+      grid-template-columns: repeat(var(--eva-columns, 4), minmax(0, 1fr));
+      gap: 2.5rem 1.5rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.featured_collection",
+  "class": "eva-featured-section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "t:eva.settings.collection"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:eva.settings.eyebrow"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:eva.settings.heading",
+      "info": "t:eva.info.featured_heading",
+      "default": "The Silk Edit"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "t:eva.settings.link_label",
+      "default": "View all"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "t:eva.settings.products_to_show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "t:eva.settings.columns_desktop",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "t:eva.settings.image_ratio",
+      "options": [
+        { "value": "3 / 4", "label": "3:4" },
+        { "value": "4 / 5", "label": "4:5" },
+        { "value": "2 / 3", "label": "2:3" }
+      ],
+      "default": "3 / 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "label": "t:eva.settings.show_secondary_image",
+      "info": "t:eva.info.show_secondary_image",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.featured_collection"
+    }
+  ]
+}
+{% endschema %}

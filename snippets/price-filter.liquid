@@ -10,6 +10,12 @@
   {% render 'price-filter', filter: filter, filter_style: 'vertical', id_prefix: 'dialog' %}
 {%- enddoc -%}
 
+<script
+  src="{{ 'floating-panel.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {%- liquid
   assign is_horizontal = false
   assign is_vertical = false

@@ -1,0 +1,103 @@
+{%- doc -%}
+  Outputs OnlineStore (Organization) and WebSite JSON-LD on the home page only, as Google recommends.
+  Every fact comes from shop data or the Eva brand theme settings, so the markup matches what the
+  storefront says (shipping regions, return window). Replaces Horizon's header Organization snippet,
+  which printed on every page with an empty URL on the home page.
+
+  @example
+  {% render 'eva-structured-data' %}
+{%- enddoc -%}
+
+{%- if request.page_type == 'index' -%}
+  {%- liquid
+    assign organization_id = shop.url | append: '/#organization'
+    assign website_id = shop.url | append: '/#website'
+    assign search_template = shop.url | append: routes.search_url | append: '?q={search_term_string}'
+    assign country_codes = localization.available_countries | map: 'iso_code'
+
+    assign social_urls = settings.eva_social_instagram | append: '|' | append: settings.eva_social_tiktok | append: '|' | append: settings.eva_social_facebook | append: '|' | append: settings.eva_social_pinterest | append: '|' | append: settings.eva_social_youtube | split: '|'
+    assign areas = settings.eva_area_served | split: ','
+    assign same_as_started = false
+    assign area_served_started = false
+  -%}
+
+  {%- capture same_as -%}
+    {%- for url in social_urls -%}
+      {%- if url != blank -%}
+        {%- if same_as_started %},{% endif -%}
+        {{- url | strip | json -}}
+        {%- assign same_as_started = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+
+  {%- capture area_served -%}
+    {%- for area in areas -%}
+      {%- assign area_name = area | strip -%}
+      {%- if area_name != blank -%}
+        {%- if area_served_started %},{% endif -%}
+        {{- area_name | json -}}
+        {%- assign area_served_started = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "OnlineStore",
+          "@id": {{ organization_id | json }},
+          "name": {{ shop.name | json }},
+          {%- if shop.description != blank %}
+            "description": {{ shop.description | json }},
+          {%- endif %}
+          {%- if settings.logo != blank %}
+            "logo": {
+              "@type": "ImageObject",
+              "url": {{ settings.logo | image_url: width: 600 | prepend: 'https:' | json }},
+              "width": 600,
+              "height": {{ 600 | divided_by: settings.logo.aspect_ratio | round }}
+            },
+          {%- endif %}
+          {%- if same_as != blank %}
+            "sameAs": [{{ same_as }}],
+          {%- endif %}
+          {%- if area_served != blank %}
+            "areaServed": [{{ area_served }}],
+          {%- endif %}
+          {%- if settings.eva_return_days > 0 and country_codes.size > 0 %}
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": {{ country_codes | json }},
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": {{ settings.eva_return_days }},
+              {%- if settings.eva_free_returns %}
+                "returnFees": "https://schema.org/FreeReturn",
+              {%- endif %}
+              "returnMethod": "https://schema.org/ReturnByMail"
+            },
+          {%- endif %}
+          "url": {{ shop.url | json }}
+        },
+        {
+          "@type": "WebSite",
+          "@id": {{ website_id | json }},
+          "name": {{ shop.name | json }},
+          "inLanguage": {{ request.locale.iso_code | json }},
+          "publisher": { "@id": {{ organization_id | json }} },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": {{ search_template | json }}
+            },
+            "query-input": "required name=search_term_string"
+          },
+          "url": {{ shop.url | json }}
+        }
+      ]
+    }
+  </script>
+{%- endif -%}

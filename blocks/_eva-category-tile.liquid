@@ -1,0 +1,78 @@
+{%- doc -%}
+  One category tile: a portrait image with the category name set in the display serif.
+  The image falls back to the collection's featured image, the label to its title and the link
+  to its URL. Used by sections/eva-category-tiles.liquid.
+{%- enddoc -%}
+
+{%- liquid
+  assign collection = block.settings.collection
+  assign image = block.settings.image | default: collection.featured_image
+  assign label = block.settings.label | default: collection.title
+  assign url = block.settings.link | default: collection.url | default: routes.collections_url
+-%}
+
+<li
+  class="eva-tile"
+  {{ block.shopify_attributes }}
+>
+  <a
+    href="{{ url }}"
+    class="eva-tile__link"
+  >
+    <span class="eva-tile__media eva-media">
+      {%- if image != blank -%}
+        {%- comment -%} The visible label names the link, so the image is decorative. {%- endcomment -%}
+        {{
+          image
+          | image_url: width: 1200
+          | image_tag:
+            widths: '300, 450, 600, 800, 1000, 1200',
+            sizes: '(min-width: 750px) 33vw, 80vw',
+            loading: 'lazy',
+            alt: ''
+        }}
+      {%- else -%}
+        {{- 'collection-1' | placeholder_svg_tag: 'eva-placeholder' -}}
+      {%- endif -%}
+    </span>
+    <span class="eva-tile__label eva-heading">{{ label | escape }}</span>
+  </a>
+</li>
+
+{% schema %}
+{
+  "name": "t:eva.blocks.category_tile",
+  "tag": null,
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "t:eva.settings.collection"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:eva.settings.image",
+      "info": "t:eva.info.tile_image"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:eva.settings.label",
+      "info": "t:eva.info.tile_label",
+      "default": "Bras"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:eva.settings.link",
+      "info": "t:eva.info.tile_link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.blocks.category_tile"
+    }
+  ]
+}
+{% endschema %}

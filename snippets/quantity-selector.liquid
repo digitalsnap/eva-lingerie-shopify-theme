@@ -13,6 +13,12 @@
   @param {string} [wrapper_class] - Extra class for the wrapper, used to scope block-level CSS variable overrides so surface-level styles (e.g. quick-add modal) can override them.
 {%- enddoc -%}
 
+<script
+  src="{{ 'price-per-item.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {% liquid
   if variant
     assign variant = variant

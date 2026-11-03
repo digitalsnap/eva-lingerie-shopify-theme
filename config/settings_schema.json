@@ -70,6 +70,135 @@
     ]
   },
   {
+    "name": "t:eva.settings_groups.brand",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:eva.content.brand_palette"
+      },
+      {
+        "type": "paragraph",
+        "content": "t:eva.content.brand_palette_info"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_ivory",
+        "label": "t:eva.settings.ivory",
+        "default": "#FBF7F4"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_blush",
+        "label": "t:eva.settings.blush",
+        "default": "#E9D6CF"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_wine",
+        "label": "t:eva.settings.wine",
+        "default": "#6B1F2E"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_plum",
+        "label": "t:eva.settings.plum",
+        "default": "#3A2630"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_charcoal",
+        "label": "t:eva.settings.charcoal",
+        "default": "#2B2226"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_gold",
+        "label": "t:eva.settings.gold",
+        "default": "#B88E62"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_gold_text",
+        "label": "t:eva.settings.gold_text",
+        "info": "t:eva.info.gold_text",
+        "default": "#785836"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_grey",
+        "label": "t:eva.settings.caption_grey",
+        "default": "#7A6B70"
+      },
+      {
+        "type": "color",
+        "id": "eva_color_border",
+        "label": "t:eva.settings.border",
+        "default": "#CDB9B0"
+      },
+      {
+        "type": "header",
+        "content": "t:eva.content.store_facts"
+      },
+      {
+        "type": "paragraph",
+        "content": "t:eva.content.store_facts_info"
+      },
+      {
+        "type": "text",
+        "id": "eva_area_served",
+        "label": "t:eva.settings.area_served",
+        "info": "t:eva.info.area_served",
+        "default": "Europe, United States, United Arab Emirates"
+      },
+      {
+        "type": "range",
+        "id": "eva_return_days",
+        "label": "t:eva.settings.return_days",
+        "info": "t:eva.info.return_days",
+        "min": 0,
+        "max": 60,
+        "step": 1,
+        "unit": "d",
+        "default": 14
+      },
+      {
+        "type": "checkbox",
+        "id": "eva_free_returns",
+        "label": "t:eva.settings.free_returns",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "t:eva.content.social"
+      },
+      {
+        "type": "url",
+        "id": "eva_social_instagram",
+        "label": "t:eva.settings.instagram"
+      },
+      {
+        "type": "url",
+        "id": "eva_social_tiktok",
+        "label": "t:eva.settings.tiktok"
+      },
+      {
+        "type": "url",
+        "id": "eva_social_facebook",
+        "label": "t:eva.settings.facebook"
+      },
+      {
+        "type": "url",
+        "id": "eva_social_pinterest",
+        "label": "t:eva.settings.pinterest"
+      },
+      {
+        "type": "url",
+        "id": "eva_social_youtube",
+        "label": "t:eva.settings.youtube"
+      }
+    ]
+  },
+  {
     "name": "t:names.typography",
     "settings": [
       {

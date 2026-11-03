@@ -1,0 +1,291 @@
+/*
+ * Eva Lingerie base layer: layout, colour schemes, type scale and buttons shared by every eva-* section.
+ * Brand colour values come from theme settings (snippets/eva-tokens.liquid); fonts reuse Horizon's
+ * --font-*--family variables so the theme editor's font pickers stay in control.
+ */
+
+:root {
+  --eva-gutter: clamp(1rem, 5.6vw, 4.5rem);
+  --eva-page-max: 82.5rem;
+  --eva-header-height: 3.5rem;
+  --eva-tracking-label: 0.22em;
+  --eva-tracking-nav: 0.14em;
+  --eva-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --eva-duration: 0.25s;
+}
+
+@media screen and (min-width: 990px) {
+  :root {
+    --eva-header-height: 4.5rem;
+  }
+}
+
+/* Layout */
+
+.eva-page {
+  width: min(100% - 2 * var(--eva-gutter), var(--eva-page-max));
+  margin-inline: auto;
+}
+
+.eva-section {
+  padding-block: calc(var(--eva-pt, 0px) * 0.6) calc(var(--eva-pb, 0px) * 0.6);
+}
+
+@media screen and (min-width: 750px) {
+  .eva-section {
+    padding-block: var(--eva-pt, 0px) var(--eva-pb, 0px);
+  }
+}
+
+/* Colour schemes. Each pairing passes WCAG AA for body text (see the Option A colour rules). */
+
+:is(.eva-scheme-ivory, .eva-scheme-blush, .eva-scheme-plum, .eva-scheme-charcoal, .eva-scheme-wine) {
+  background-color: var(--eva-bg);
+  color: var(--eva-fg);
+}
+
+.eva-scheme-ivory {
+  --eva-bg: var(--eva-ivory);
+  --eva-fg: var(--eva-charcoal);
+  --eva-muted: var(--eva-grey);
+  --eva-eyebrow: var(--eva-gold-text);
+  --eva-line: var(--eva-border);
+}
+
+.eva-scheme-blush {
+  --eva-bg: var(--eva-blush);
+  --eva-fg: var(--eva-charcoal);
+  --eva-muted: var(--eva-charcoal);
+  --eva-eyebrow: var(--eva-gold-text);
+  --eva-line: var(--eva-border);
+}
+
+.eva-scheme-plum {
+  --eva-bg: var(--eva-plum);
+  --eva-fg: var(--eva-ivory);
+  --eva-muted: color-mix(in srgb, var(--eva-ivory) 80%, var(--eva-plum));
+  --eva-eyebrow: var(--eva-gold);
+  --eva-line: color-mix(in srgb, var(--eva-ivory) 25%, var(--eva-plum));
+}
+
+.eva-scheme-charcoal {
+  --eva-bg: var(--eva-charcoal);
+  --eva-fg: var(--eva-ivory);
+  --eva-muted: color-mix(in srgb, var(--eva-ivory) 80%, var(--eva-charcoal));
+  --eva-eyebrow: var(--eva-gold);
+  --eva-line: color-mix(in srgb, var(--eva-ivory) 25%, var(--eva-charcoal));
+}
+
+.eva-scheme-wine {
+  --eva-bg: var(--eva-wine);
+  --eva-fg: var(--eva-ivory);
+  --eva-muted: var(--eva-ivory);
+  --eva-eyebrow: var(--eva-ivory);
+  --eva-line: color-mix(in srgb, var(--eva-ivory) 30%, var(--eva-wine));
+}
+
+/* Typography */
+
+.eva-eyebrow {
+  margin: 0;
+  font-family: var(--font-subheading--family);
+  font-weight: var(--font-subheading--weight);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  letter-spacing: var(--eva-tracking-label);
+  text-transform: uppercase;
+  color: var(--eva-eyebrow, currentcolor);
+}
+
+.eva-heading {
+  margin: 0;
+  font-family: var(--font-heading--family);
+  font-style: var(--font-heading--style);
+  font-weight: var(--font-heading--weight);
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-transform: none;
+  text-wrap: balance;
+  color: inherit;
+}
+
+.eva-heading em {
+  font-style: italic;
+  font-weight: var(--font-accent--weight);
+}
+
+.eva-heading--xl {
+  font-size: clamp(2.5rem, 1.2rem + 3.4vw, 4.5rem);
+  line-height: 1.05;
+}
+
+.eva-heading--lg {
+  font-size: clamp(2.125rem, 1rem + 2.9vw, 3.75rem);
+}
+
+.eva-heading--md {
+  font-size: clamp(1.875rem, 1rem + 2vw, 2.875rem);
+}
+
+.eva-heading--sm {
+  font-size: clamp(1.75rem, 1rem + 1.4vw, 2.25rem);
+}
+
+.eva-heading--xs {
+  font-size: clamp(1.625rem, 1.2rem + 0.75vw, 2rem);
+}
+
+.eva-body {
+  margin: 0;
+  font-family: var(--font-body--family);
+  font-weight: var(--font-body--weight);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.eva-rte > * {
+  margin-block: 0 1em;
+}
+
+.eva-rte > :last-child {
+  margin-block-end: 0;
+}
+
+.eva-caption {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--eva-muted, currentcolor);
+}
+
+.eva-link {
+  font-family: var(--font-subheading--family);
+  font-weight: var(--font-subheading--weight);
+  font-size: 0.6875rem;
+  letter-spacing: var(--eva-tracking-label);
+  text-transform: uppercase;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: currentcolor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.5em;
+}
+
+.eva-link:hover {
+  text-decoration-color: transparent;
+}
+
+/* Buttons: square corners, one wine button in view at most (Option A rules). */
+
+.eva-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 2.875rem;
+  padding: 0.75rem 1.75rem;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-family: var(--font-subheading--family);
+  font-weight: var(--font-subheading--weight);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--eva-duration) var(--eva-ease), color var(--eva-duration) var(--eva-ease),
+    border-color var(--eva-duration) var(--eva-ease);
+}
+
+.eva-button--primary {
+  background-color: var(--eva-wine);
+  border-color: var(--eva-wine);
+  color: var(--eva-ivory);
+}
+
+.eva-button--primary:hover {
+  background-color: var(--eva-plum);
+  border-color: var(--eva-plum);
+}
+
+.eva-button--outline {
+  background-color: transparent;
+  border-color: currentcolor;
+  color: var(--eva-fg, currentcolor);
+}
+
+.eva-button--outline:hover {
+  background-color: var(--eva-fg, currentcolor);
+  border-color: var(--eva-fg, currentcolor);
+  color: var(--eva-bg, var(--eva-ivory));
+}
+
+.eva-button--gold {
+  background-color: var(--eva-gold);
+  border-color: var(--eva-gold);
+  color: var(--eva-charcoal);
+}
+
+.eva-button--gold:hover {
+  background-color: transparent;
+  color: var(--eva-fg, var(--eva-charcoal));
+}
+
+:is(.eva-button, .eva-link, .eva-icon-button):focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 3px;
+}
+
+/* Icon buttons (header, drawers, video controls) */
+
+.eva-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.eva-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+}
+
+/* Media */
+
+.eva-media {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--eva-blush);
+}
+
+.eva-media > :is(img, video, svg),
+.eva-media > picture > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.eva-placeholder {
+  background-color: var(--eva-blush);
+  fill: color-mix(in srgb, var(--eva-charcoal) 25%, var(--eva-blush));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eva *,
+  .eva *::before,
+  .eva *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

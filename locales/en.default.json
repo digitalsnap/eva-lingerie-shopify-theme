@@ -371,5 +371,52 @@
       "default_title": "Default Title",
       "sticky_add_to_cart": "Quick add to cart bar"
     }
+  },
+  "eva": {
+    "header": {
+      "main_navigation": "Main navigation",
+      "open_menu": "Open menu",
+      "close_menu": "Close menu",
+      "menu": "Menu",
+      "search": "Search",
+      "account": "Account",
+      "log_in": "Log in",
+      "cart": "Bag"
+    },
+    "banner": {
+      "play_video": "Play background video",
+      "pause_video": "Pause background video"
+    },
+    "card": {
+      "colours": "Colours",
+      "more_colours": {
+        "one": "+{{ count }} more",
+        "other": "+{{ count }} more"
+      },
+      "from_price": "From {{ price }}",
+      "sale_price": "Sale price",
+      "regular_price": "Regular price",
+      "sale": "Sale",
+      "sold_out": "Sold out",
+      "new": "New",
+      "placeholder_title": "Product title"
+    },
+    "newsletter": {
+      "email_label": "Email address",
+      "success": "Thank you for subscribing.",
+      "error": "Please enter a valid email address and try again."
+    },
+    "localization": {
+      "country": "Country / region",
+      "language": "Language",
+      "update": "Update"
+    },
+    "footer": {
+      "rights": "All rights reserved.",
+      "payment_methods": "Payment methods",
+      "social": "Social media",
+      "opens_new_window": "opens in a new window",
+      "choose_menu": "Choose a menu for this column in the theme editor."
+    }
   }
 }

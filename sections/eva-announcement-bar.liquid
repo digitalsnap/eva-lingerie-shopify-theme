@@ -1,0 +1,85 @@
+{%- if section.settings.text != blank -%}
+  <div class="eva-announcement eva-scheme-{{ section.settings.color_scheme }}">
+    <p class="eva-announcement__text eva-page">
+      {%- if section.settings.link != blank -%}
+        <a
+          href="{{ section.settings.link }}"
+          class="eva-announcement__link"
+        >
+          {{- section.settings.text | escape -}}
+        </a>
+      {%- else -%}
+        {{- section.settings.text | escape -}}
+      {%- endif -%}
+    </p>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-announcement {
+    text-align: center;
+  }
+
+  .eva-announcement__text {
+    margin-block: 0;
+    padding-block: 0.6875rem;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: var(--eva-tracking-label);
+    text-transform: uppercase;
+  }
+
+  .eva-announcement__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-announcement__link:hover,
+  .eva-announcement__link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.announcement",
+  "class": "eva-announcement-section",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "t:eva.settings.text",
+      "default": "Free shipping on orders over [amount] · Ships to Europe, US and UAE"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:eva.settings.link"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" },
+        { "value": "plum", "label": "t:eva.options.plum" },
+        { "value": "charcoal", "label": "t:eva.options.charcoal" },
+        { "value": "wine", "label": "t:eva.options.wine" }
+      ],
+      "default": "wine"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.announcement"
+    }
+  ]
+}
+{% endschema %}

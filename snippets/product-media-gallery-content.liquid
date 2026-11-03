@@ -18,6 +18,17 @@
     block_shopify_attributes: block.shopify_attributes,
   %}
 {% enddoc %}
+
+<script
+  src="{{ 'media-gallery.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'slideshow.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
 {%- if block_settings.zoom -%}
   <script
     src="{{ 'zoom-dialog.js' | asset_url }}"

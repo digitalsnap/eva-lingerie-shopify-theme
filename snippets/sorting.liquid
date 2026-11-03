@@ -10,6 +10,12 @@
   @param {string} section_id - The section ID
 {%- enddoc -%}
 
+<script
+  src="{{ 'floating-panel.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 <sorting-filter-component
   class="sorting-filter{% if filter_style == 'horizontal' %} sorting-filter__horizontal{% endif %}"
   on:change="/updateFilterAndSorting"

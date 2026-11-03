@@ -16,6 +16,12 @@
   {% render 'product-media', media: media, preview_image_only: false, loading: 'lazy' %}
 {%- enddoc -%}
 
+<script
+  src="{{ 'media.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
 {% liquid
   assign widths = widths | default: '240, 352, 640, 832, 1200, 1600, 1920, 2560, 3840'
   assign ref_image_to_transition = ''

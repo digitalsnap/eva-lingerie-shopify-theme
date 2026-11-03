@@ -1,0 +1,88 @@
+{%- doc -%}
+  One footer link column: an optional heading and the links of a navigation menu.
+  Used by sections/eva-footer.liquid.
+{%- enddoc -%}
+
+{%- liquid
+  assign menu = block.settings.menu
+  assign heading = block.settings.heading
+  assign heading_id = 'EvaFooterMenu-' | append: block.id
+
+  # An empty column shows nothing on the storefront; the editor keeps the heading as a hint.
+  assign show_heading = false
+  if heading != blank
+    if menu.links.size > 0 or request.design_mode
+      assign show_heading = true
+    endif
+  endif
+-%}
+
+<div
+  class="eva-footer__menu"
+  {{ block.shopify_attributes }}
+>
+  {%- if show_heading -%}
+    <h2
+      id="{{ heading_id }}"
+      class="eva-footer__heading"
+    >
+      {{- heading | escape -}}
+    </h2>
+  {%- endif -%}
+
+  {%- if menu.links.size > 0 -%}
+    <nav
+      {% if heading != blank %}
+        aria-labelledby="{{ heading_id }}"
+      {% else %}
+        aria-label="{{ menu.title | escape }}"
+      {% endif %}
+    >
+      <ul
+        class="eva-footer__links"
+        role="list"
+      >
+        {%- for link in menu.links -%}
+          <li>
+            <a
+              href="{{ link.url }}"
+              class="eva-footer__link"
+              {% if link.current %}
+                aria-current="page"
+              {% endif %}
+            >
+              {{- link.title | escape -}}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+  {%- elsif request.design_mode -%}
+    <p class="eva-caption">{{ 'eva.footer.choose_menu' | t }}</p>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:eva.blocks.footer_menu",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:eva.settings.heading",
+      "default": "Shop"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:eva.settings.menu"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.blocks.footer_menu"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,18 @@
+{%- doc -%}
+  Loads every module a Horizon product form needs, including the markup the quick-add modal
+  injects after load (variant picker, prices, media gallery, quantity rules). Rendered globally on
+  every template except the Eva home page, and by each snippet or block that renders a product form,
+  so the form works wherever it appears. Browsers run a module URL only once.
+
+  @example
+  {% render 'product-form-scripts' %}
+{%- enddoc -%}
+
+{%- assign product_form_modules = 'product-form.js,fly-to-cart.js,variant-picker.js,product-price.js,product-sku.js,product-inventory.js,media.js,media-gallery.js,slideshow.js,volume-pricing.js,price-per-item.js,volume-pricing-info.js' | split: ',' -%}
+{%- for module in product_form_modules -%}
+  <script
+    src="{{ module | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{%- endfor -%}
