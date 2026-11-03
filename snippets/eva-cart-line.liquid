@@ -1,0 +1,375 @@
+{%- doc -%}
+  One cart line: image, title, options, plan, properties, bundle contents, prices, discounts,
+  quantity control and remove link. Shared by the cart page and the cart drawer, inside <eva-cart>.
+
+  @param {object} item - The line item.
+  @param {number} index - The line's 1-based position (for unique ids).
+  @param {string} id_prefix - A unique prefix for ids, e.g. the section id.
+
+  @example
+  {% render 'eva-cart-line', item: item, index: forloop.index, id_prefix: section.id %}
+{%- enddoc -%}
+
+{%- liquid
+  assign rule = item.variant.quantity_rule
+  assign quantity_min = rule.min | default: 1
+  assign quantity_step = rule.increment | default: 1
+  assign quantity_max = rule.max
+  assign input_id = 'EvaCartQuantity-' | append: id_prefix | append: '-' | append: index
+-%}
+<li class="eva-cart__line">
+  <a
+    href="{{ item.url }}"
+    class="eva-cart__media eva-media"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    {%- if item.image != blank -%}
+      {{
+        item.image
+        | image_url: width: 400
+        | image_tag: widths: '120, 200, 300, 400', sizes: '(min-width: 750px) 140px, 96px', loading: 'lazy', alt: ''
+      }}
+    {%- else -%}
+      {{- 'product-apparel-1' | placeholder_svg_tag: 'eva-placeholder' -}}
+    {%- endif -%}
+  </a>
+
+  <div class="eva-cart__details">
+    <h3 class="eva-cart__title">
+      <a href="{{ item.url }}">{{ item.product.title | escape }}</a>
+    </h3>
+
+    {%- if item.parent_relationship.parent != nil -%}
+      <p class="eva-caption">{{ 'eva.cart.for_parent' | t: title: item.parent_relationship.parent.title }}</p>
+    {%- endif -%}
+
+    {%- unless item.product.has_only_default_variant or item.item_components.size > 0 -%}
+      <p class="eva-caption">
+        {%- for option in item.options_with_values -%}
+          {{ option.name | escape }}: {{ option.value | escape }}
+          {%- unless forloop.last %}<span aria-hidden="true"> · </span>{% endunless -%}
+        {%- endfor -%}
+      </p>
+    {%- endunless -%}
+
+    {%- if item.selling_plan_allocation != nil -%}
+      <p class="eva-caption">{{ item.selling_plan_allocation.selling_plan.name | escape }}</p>
+    {%- endif -%}
+
+    {%- for property in item.properties -%}
+      {%- assign property_first_char = property.first | slice: 0 -%}
+      {%- if property.last != blank and property_first_char != '_' -%}
+        <p class="eva-caption">
+          {{ property.first | escape }}:
+          {% if property.last contains '/uploads/' -%}
+            <a
+              href="{{ property.last }}"
+              target="_blank"
+              rel="noopener"
+            >
+              {{- property.last | split: '/' | last | escape -}}
+            </a>
+          {%- else -%}
+            {{ property.last | escape }}
+          {%- endif %}
+        </p>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if item.item_components.size > 0 -%}
+      <ul
+        class="eva-cart__components eva-caption"
+        role="list"
+      >
+        {%- for component in item.item_components -%}
+          <li>{{ component.quantity }} × {{ component.title | escape }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    <p class="eva-cart__unit">
+      {%- if item.original_price > item.final_price -%}
+        <span class="visually-hidden">{{ 'eva.card.regular_price' | t }}</span>
+        <s>{{ item.original_price | money }}</s>
+        <span class="visually-hidden">{{ 'eva.card.sale_price' | t }}</span>
+      {%- endif -%}
+      {{ item.final_price | money }}
+      {%- if item.unit_price_measurement %}
+        <span class="eva-caption">
+          ({{ item.unit_price | money }}/
+          {%- if item.unit_price_measurement.reference_value != 1 -%}
+            {{- item.unit_price_measurement.reference_value -}}
+          {%- endif -%}
+          {{- item.unit_price_measurement.reference_unit -}})
+        </span>
+      {%- endif -%}
+    </p>
+
+    {%- for allocation in item.line_level_discount_allocations -%}
+      <p class="eva-cart__discount-line eva-caption">
+        {{ allocation.discount_application.title | escape }} (−{{ allocation.amount | money }})
+      </p>
+    {%- endfor -%}
+
+    <div class="eva-cart__actions">
+      <div class="eva-quantity">
+        {%- if item.instructions.can_update_quantity -%}
+          <label
+            for="{{ input_id }}"
+            class="visually-hidden"
+          >
+            {{- 'eva.cart.quantity_for' | t: title: item.product.title -}}
+          </label>
+          <button
+            type="button"
+            class="eva-quantity__button"
+            data-step="-1"
+            data-focus-key="minus-{{ item.key }}"
+            aria-label="{{ 'eva.cart.decrease' | t: title: item.product.title | escape }}"
+            {% if item.quantity <= quantity_min %}
+              disabled
+            {% endif %}
+          >
+            <span aria-hidden="true">−</span>
+          </button>
+          <input
+            id="{{ input_id }}"
+            class="eva-quantity__input"
+            type="number"
+            name="updates[]"
+            value="{{ item.quantity }}"
+            min="0"
+            step="{{ quantity_step }}"
+            {% if quantity_max != nil %}
+              max="{{ quantity_max }}"
+            {% endif %}
+            inputmode="numeric"
+            data-quantity
+            data-key="{{ item.key }}"
+            data-min="{{ quantity_min }}"
+            data-focus-key="quantity-{{ item.key }}"
+          >
+          <button
+            type="button"
+            class="eva-quantity__button"
+            data-step="1"
+            data-focus-key="plus-{{ item.key }}"
+            aria-label="{{ 'eva.cart.increase' | t: title: item.product.title | escape }}"
+            {% if quantity_max != nil and item.quantity >= quantity_max %}
+              disabled
+            {% endif %}
+          >
+            <span aria-hidden="true">+</span>
+          </button>
+        {%- else -%}
+          <span class="eva-quantity__static">
+            <span class="visually-hidden">{{ 'eva.cart.quantity_for' | t: title: item.product.title }}:</span>
+            {{ item.quantity }}
+          </span>
+          <input
+            type="hidden"
+            name="updates[]"
+            value="{{ item.quantity }}"
+          >
+        {%- endif -%}
+      </div>
+
+      {%- if item.instructions.can_remove -%}
+        <a
+          href="{{ item.url_to_remove }}"
+          class="eva-link eva-cart__remove"
+          data-remove
+          data-key="{{ item.key }}"
+          data-focus-key="remove-{{ item.key }}"
+        >
+          {{- 'eva.cart.remove' | t -}}
+          <span class="visually-hidden"> {{ item.product.title | escape }}</span>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <p
+      class="eva-cart__line-error"
+      role="alert"
+      data-line-error="{{ item.key }}"
+      hidden
+    ></p>
+  </div>
+
+  <p class="eva-cart__line-price">
+    <span class="visually-hidden">{{ 'eva.cart.line_total' | t }}</span>
+    {%- if item.original_line_price > item.final_line_price -%}
+      <s class="eva-caption">{{ item.original_line_price | money }}</s>
+    {%- endif -%}
+    <span>{{ item.final_line_price | money }}</span>
+  </p>
+</li>
+
+{% stylesheet %}
+  .eva-cart__lines {
+    border-block-start: 1px solid var(--eva-line);
+  }
+
+  .eva-cart__line {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: 1rem 1.25rem;
+    padding-block: 1.5rem;
+    border-block-end: 1px solid var(--eva-line);
+  }
+
+  .eva-cart__lines,
+  .eva-cart__components {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-cart__media {
+    aspect-ratio: 3 / 4;
+    grid-row: span 2;
+  }
+
+  .eva-cart__details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .eva-cart__title {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-weight: var(--font-body--weight);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .eva-cart__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-cart__title a:hover {
+    text-decoration: underline;
+    text-decoration-color: currentcolor;
+  }
+
+  .eva-cart__unit {
+    margin: 0.25rem 0 0;
+    font-size: 0.8125rem;
+  }
+
+  .eva-cart__unit s {
+    color: var(--eva-muted);
+  }
+
+  .eva-cart__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin-block-start: 0.75rem;
+  }
+
+  .eva-quantity {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--eva-border);
+    background-color: #fff;
+  }
+
+  .eva-quantity__button {
+    width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--eva-charcoal);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .eva-quantity__button:disabled {
+    color: var(--eva-grey);
+    cursor: not-allowed;
+  }
+
+  .eva-quantity__button:focus-visible,
+  .eva-quantity__input:focus-visible {
+    outline: 2px solid var(--eva-charcoal);
+    outline-offset: -2px;
+  }
+
+  .eva-quantity__input {
+    width: 3rem;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--eva-charcoal);
+    font-size: 0.875rem;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+
+  .eva-quantity__input::-webkit-outer-spin-button,
+  .eva-quantity__input::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+  }
+
+  .eva-quantity__static {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* +/- need the script; without it, shoppers type a quantity and press Update. */
+  eva-cart:not(:defined) .eva-quantity__button {
+    display: none;
+  }
+
+  .eva-cart__remove {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .eva-cart__line-error {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--eva-wine);
+  }
+
+  .eva-cart__line-price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    grid-column: 2;
+    margin: 0;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.9375rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .eva-cart__line {
+      grid-template-columns: 8.75rem minmax(0, 1fr) auto;
+    }
+
+    .eva-cart__media {
+      grid-row: auto;
+    }
+
+    .eva-cart__line-price {
+      grid-column: 3;
+      align-items: flex-end;
+    }
+  }
+{% endstylesheet %}

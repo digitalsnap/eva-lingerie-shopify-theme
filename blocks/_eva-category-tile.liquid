@@ -15,28 +15,7 @@
   class="eva-tile"
   {{ block.shopify_attributes }}
 >
-  <a
-    href="{{ url }}"
-    class="eva-tile__link"
-  >
-    <span class="eva-tile__media eva-media">
-      {%- if image != blank -%}
-        {%- comment -%} The visible label names the link, so the image is decorative. {%- endcomment -%}
-        {{
-          image
-          | image_url: width: 1200
-          | image_tag:
-            widths: '300, 450, 600, 800, 1000, 1200',
-            sizes: '(min-width: 750px) 33vw, 80vw',
-            loading: 'lazy',
-            alt: ''
-        }}
-      {%- else -%}
-        {{- 'collection-1' | placeholder_svg_tag: 'eva-placeholder' -}}
-      {%- endif -%}
-    </span>
-    <span class="eva-tile__label eva-heading">{{ label | escape }}</span>
-  </a>
+  {%- render 'eva-collection-tile', url: url, label: label, image: image -%}
 </li>
 
 {% schema %}

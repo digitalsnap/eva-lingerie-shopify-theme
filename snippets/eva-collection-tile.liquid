@@ -1,0 +1,90 @@
+{%- doc -%}
+  A portrait category tile: image with the name set in the display serif over a soft scrim.
+  The visible name labels the link, so the image is decorative. The caller wraps it in a list item
+  and sets --eva-tile-ratio.
+
+  @param {string} url - Where the tile links.
+  @param {string} label - The category name.
+  @param {object} [image] - An image object; a placeholder is shown when blank.
+  @param {string} [sizes] - The image `sizes` attribute.
+  @param {string} [loading] - 'lazy' (default) or 'eager'.
+
+  @example
+  {% render 'eva-collection-tile', url: collection.url, label: collection.title, image: collection.featured_image %}
+{%- enddoc -%}
+
+{%- liquid
+  assign tile_sizes = sizes | default: '(min-width: 750px) 33vw, 80vw'
+  assign tile_loading = loading | default: 'lazy'
+-%}
+
+<a
+  href="{{ url }}"
+  class="eva-tile__link"
+>
+  <span class="eva-tile__media eva-media">
+    {%- if image != blank -%}
+      {{
+        image
+        | image_url: width: 1200
+        | image_tag:
+          widths: '300, 450, 600, 800, 1000, 1200',
+          sizes: tile_sizes,
+          loading: tile_loading,
+          alt: ''
+      }}
+    {%- else -%}
+      {{- 'collection-1' | placeholder_svg_tag: 'eva-placeholder' -}}
+    {%- endif -%}
+  </span>
+  <span class="eva-tile__label eva-heading">{{ label | escape }}</span>
+</a>
+
+{% stylesheet %}
+  .eva-tile__link {
+    position: relative;
+    display: block;
+    aspect-ratio: var(--eva-tile-ratio, 4 / 5);
+    overflow: hidden;
+    color: var(--eva-ivory);
+    text-decoration: none;
+  }
+
+  .eva-tile__media {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* A soft scrim under the label keeps ivory text legible on light photographs. */
+  .eva-tile__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(43 34 38 / 0.55), rgb(43 34 38 / 0) 45%);
+  }
+
+  .eva-tile__media img {
+    transition: transform 0.6s var(--eva-ease);
+  }
+
+  .eva-tile__link:hover .eva-tile__media img {
+    transform: scale(1.03);
+  }
+
+  .eva-tile__link:focus-visible {
+    outline: 2px solid var(--eva-fg);
+    outline-offset: 3px;
+  }
+
+  .eva-tile__label {
+    position: absolute;
+    inset-inline: 1rem;
+    inset-block-end: clamp(1.25rem, 3vw, 2rem);
+    z-index: 1;
+    font-size: clamp(1.5rem, 0.9rem + 1.6vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+{% endstylesheet %}

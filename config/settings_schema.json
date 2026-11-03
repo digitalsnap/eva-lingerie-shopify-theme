@@ -1980,7 +1980,8 @@
         "type": "checkbox",
         "id": "quick_add",
         "label": "t:settings.quick_add",
-        "default": true
+        "info": "t:eva.info.quick_add",
+        "default": false
       },
       {
         "type": "checkbox",

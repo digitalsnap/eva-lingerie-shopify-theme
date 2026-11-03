@@ -1,0 +1,151 @@
+{%- doc -%}
+  The Filter button (opens `eva-filter-drawer`) and the Sort dropdown. Sorting is a list of plain
+  links that keep the current filters, so it works without JavaScript and adds none.
+
+  @param {object} results - A collection or search object (filters, sort_options, sort_by, default_sort_by).
+  @param {string} base_url - The listing URL without filters or sorting, e.g. collection.url or "/search?q=silk".
+  @param {string} drawer_id - The id of the filter drawer's dialog-component.
+  @param {string} [skip_param] - A filter param_name shown elsewhere (e.g. as category pills) and left out of the drawer.
+  @param {boolean} [show_filter] - Show the Filter button. Defaults to true.
+  @param {boolean} [show_sort] - Show the Sort dropdown. Defaults to true.
+
+  @example
+  {% render 'eva-facet-actions', results: collection, base_url: collection.url, drawer_id: drawer_id %}
+{%- enddoc -%}
+
+{%- liquid
+  assign current_sort = results.sort_by | default: results.default_sort_by
+  assign joiner = '?'
+  if base_url contains '?'
+    assign joiner = '&'
+  endif
+
+  assign drawer_filter_count = 0
+  assign active_count = 0
+  for filter in results.filters
+    if filter.param_name != skip_param
+      assign drawer_filter_count = drawer_filter_count | plus: 1
+    endif
+    if filter.type == 'price_range'
+      if filter.min_value.value != nil or filter.max_value.value != nil
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+
+  assign current_sort_name = ''
+  for option in results.sort_options
+    if option.value == current_sort
+      assign current_sort_name = option.name
+    endif
+  endfor
+-%}
+
+{%- capture filter_query -%}{%- render 'eva-filter-query', results: results -%}{%- endcapture -%}
+
+<div class="eva-facet-actions">
+  {%- if show_filter != false and drawer_filter_count > 0 -%}
+    <button
+      type="button"
+      class="eva-chip"
+      on:click="#{{ drawer_id }}/showDialog"
+      aria-haspopup="dialog"
+      aria-controls="{{ drawer_id }}"
+    >
+      {{- 'eva.collection.filter' | t -}}
+      {%- if active_count > 0 %} ({{ active_count }}){% endif -%}
+    </button>
+  {%- endif -%}
+
+  {%- if show_sort != false and results.sort_options.size > 0 -%}
+    <details
+      class="eva-sort"
+      data-auto-close-details="desktop,mobile"
+    >
+      <summary class="eva-chip">
+        {{- 'eva.collection.sort_by' | t: option: current_sort_name -}}
+        {%- render 'eva-icon', icon: 'chevron', class: 'eva-sort__chevron' -%}
+      </summary>
+      <ul
+        class="eva-sort__list eva-scheme-ivory"
+        role="list"
+      >
+        {%- for option in results.sort_options -%}
+          {%- capture sort_url -%}
+            {{- base_url }}{{ joiner }}sort_by={{ option.value }}{{ filter_query | strip -}}
+          {%- endcapture -%}
+          <li>
+            <a
+              href="{{ sort_url | escape }}"
+              class="eva-sort__option"
+              rel="nofollow"
+              {% if option.value == current_sort %}
+                aria-current="true"
+              {% endif %}
+            >
+              {{- option.name | escape -}}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </details>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .eva-facet-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+  }
+
+  .eva-sort {
+    position: relative;
+  }
+
+  .eva-sort summary {
+    list-style: none;
+  }
+
+  .eva-sort summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .eva-sort__chevron {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .eva-sort[open] .eva-sort__chevron {
+    transform: rotate(180deg);
+  }
+
+  .eva-sort__list {
+    position: absolute;
+    inset-block-start: calc(100% + 0.25rem);
+    inset-inline-end: 0;
+    z-index: var(--layer-raised);
+    min-width: 13rem;
+    margin: 0;
+    padding: 0.5rem 0;
+    border: 1px solid var(--eva-border);
+    list-style: none;
+  }
+
+  .eva-sort__option {
+    display: block;
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-sort__option:hover,
+  .eva-sort__option[aria-current] {
+    text-decoration: underline;
+    text-decoration-color: currentcolor;
+    text-underline-offset: 0.3em;
+  }
+{% endstylesheet %}

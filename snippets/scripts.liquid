@@ -15,7 +15,6 @@
       "@theme/view-event-elements": "{{ 'view-event-elements.js' | asset_url }}",
       "@theme/focus": "{{ 'focus.js' | asset_url }}",
       "@theme/morph": "{{ 'morph.js' | asset_url }}",
-      "@theme/paginated-list": "{{ 'paginated-list.js' | asset_url }}",
       "@theme/performance": "{{ 'performance.js' | asset_url }}",
       "@theme/product-form": "{{ 'product-form.js' | asset_url }}",
       "@theme/recently-viewed-products": "{{ 'recently-viewed-products.js' | asset_url }}",
@@ -28,11 +27,9 @@
       "@theme/variant-resolution": "{{ 'variant-resolution.js' | asset_url }}",
       "@theme/media-gallery": "{{ 'media-gallery.js' | asset_url }}",
       "@theme/quick-add": "{{ 'quick-add.js' | asset_url }}",
-      "@theme/paginated-list-aspect-ratio": "{{ 'paginated-list-aspect-ratio.js' | asset_url }}",
       "@theme/component-cart-items": "{{ 'component-cart-items.js' | asset_url }}",
       "@theme/component-quantity-selector": "{{ 'component-quantity-selector.js' | asset_url }}",
       "@theme/comparison-slider": "{{ 'comparison-slider.js' | asset_url }}",
-      "@theme/sticky-add-to-cart": "{{ 'sticky-add-to-cart.js' | asset_url }}",
       "@theme/fly-to-cart": "{{ 'fly-to-cart.js' | asset_url }}",
       "@theme/scroll-container": "{{ 'scroll-container.js' | asset_url }}",
       "@theme/theme-drawer": "{{ 'theme-drawer.js' | asset_url }}"
@@ -92,18 +89,6 @@
   fetchpriority="low"
 >
 
-{% if template.name == 'collection' or template.name == 'search' %}
-  <link
-    rel="modulepreload"
-    href="{{ 'paginated-list-aspect-ratio.js' | asset_url }}"
-    fetchpriority="low"
-  >
-  <link
-    rel="modulepreload"
-    href="{{ 'paginated-list.js' | asset_url }}"
-    fetchpriority="low"
-  >
-{% endif %}
 
 <link
   rel="modulepreload"
@@ -126,50 +111,37 @@
   fetchpriority="low"
 >
 {%- liquid
-  # Product, collection and editorial modules. The Eva home page renders none of their elements,
-  # so it skips them: about 200 KB of JavaScript the browser no longer parses there. Every Horizon
-  # snippet or block that renders one of these elements also loads its module (a module URL only
-  # runs once), so Horizon sections added to the home page keep working. The theme editor injects
-  # sections without running their scripts, so it always gets the full set.
-  assign load_horizon_modules = true
-  if template.name == 'index' and request.design_mode == false
-    assign load_horizon_modules = false
-  endif
+  # Horizon's product, collection and editorial modules. Every storefront template is built from
+  # eva-* sections, which render none of their elements, so the storefront skips them: about 200 KB
+  # of JavaScript the browser no longer parses. Every Horizon snippet or block that renders one of
+  # these elements loads its own module (a module URL only runs once), so Horizon sections added in
+  # the editor keep working. The theme editor injects sections without running their scripts, so it
+  # always gets the full set.
+  assign load_horizon_modules = request.design_mode
 -%}
-
-{% if settings.show_cart_note %}
-  <script
-    src="{{ 'cart-note.js' | asset_url }}"
-    type="module"
-    fetchpriority="low"
-  ></script>
-{% endif %}
-{% if settings.show_add_discount_code %}
-  <script
-    src="{{ 'cart-discount.js' | asset_url }}"
-    type="module"
-    fetchpriority="low"
-  ></script>
-{% endif %}
 
 <script
   src="{{ 'dialog.js' | asset_url }}"
   type="module"
   fetchpriority="low"
 ></script>
-{%- comment -%} Cart drawer contents (quantity selectors, disclosure tooltips) can appear on any page. {%- endcomment -%}
-<script
-  src="{{ 'anchored-popover.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-<script
-  src="{{ 'component-quantity-selector.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
-
 {% if load_horizon_modules %}
+  {%- comment -%} Used by Horizon's cart blocks, accordions and quantity selectors when added in the editor. {%- endcomment -%}
+  <script
+    src="{{ 'accordion-custom.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'anchored-popover.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'component-quantity-selector.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
   <script
     src="{{ 'overflow-list.js' | asset_url }}"
     type="module"
@@ -194,11 +166,6 @@
   ></script>
   {% render 'product-form-scripts' %}
   <script
-    src="{{ 'accordion-custom.js' | asset_url }}"
-    type="module"
-    fetchpriority="low"
-  ></script>
-  <script
     src="{{ 'show-more.js' | asset_url }}"
     type="module"
     fetchpriority="low"
@@ -221,11 +188,6 @@
 {% endif %}
 
 {% if template == 'product' or template.name == 'product' or request.page_type == 'product' %}
-  <script
-    src="{{ 'sticky-add-to-cart.js' | asset_url }}"
-    type="module"
-    fetchpriority="low"
-  ></script>
   <script type="module">
     import { RecentlyViewed } from '@theme/recently-viewed-products';
     RecentlyViewed.addProduct('{{ product.id }}');

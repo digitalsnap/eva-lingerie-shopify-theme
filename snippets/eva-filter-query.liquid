@@ -1,0 +1,25 @@
+{%- doc -%}
+  Outputs the active storefront filters as a query-string fragment ("&filter.v.option.size=S&...").
+  Used to carry filters into sort links, and as an "is anything filtered?" test.
+  Price values come in cents and go out in major units, which Shopify's filter URLs expect.
+
+  @param {object} results - A collection or search object with `filters`.
+
+  @example
+  {%- capture filter_query -%}{% render 'eva-filter-query', results: collection %}{%- endcapture -%}
+{%- enddoc -%}
+
+{%- for filter in results.filters -%}
+  {%- if filter.type == 'price_range' -%}
+    {%- if filter.min_value.value != nil -%}
+      &{{ filter.min_value.param_name }}={{ filter.min_value.value | divided_by: 100.0 }}
+    {%- endif -%}
+    {%- if filter.max_value.value != nil -%}
+      &{{ filter.max_value.param_name }}={{ filter.max_value.value | divided_by: 100.0 }}
+    {%- endif -%}
+  {%- else -%}
+    {%- for value in filter.active_values -%}
+      &{{ value.param_name }}={{ value.value | url_encode }}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}

@@ -55,53 +55,6 @@
     scroll-snap-align: start;
   }
 
-  .eva-tile__link {
-    position: relative;
-    display: block;
-    aspect-ratio: var(--eva-tile-ratio, 4 / 5);
-    overflow: hidden;
-    color: var(--eva-ivory);
-    text-decoration: none;
-  }
-
-  .eva-tile__media {
-    position: absolute;
-    inset: 0;
-  }
-
-  /* A soft scrim under the label keeps ivory text legible on light photographs. */
-  .eva-tile__media::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgb(43 34 38 / 0.55), rgb(43 34 38 / 0) 45%);
-  }
-
-  .eva-tile__media img {
-    transition: transform 0.6s var(--eva-ease);
-  }
-
-  .eva-tile__link:hover .eva-tile__media img {
-    transform: scale(1.03);
-  }
-
-  .eva-tile__link:focus-visible {
-    outline: 2px solid var(--eva-fg);
-    outline-offset: 3px;
-  }
-
-  .eva-tile__label {
-    position: absolute;
-    inset-inline: 1rem;
-    inset-block-end: clamp(1.25rem, 3vw, 2rem);
-    z-index: 1;
-    font-size: clamp(1.5rem, 0.9rem + 1.6vw, 2.5rem);
-    line-height: 1.1;
-    letter-spacing: 0.04em;
-    text-align: center;
-    text-transform: uppercase;
-  }
-
   @media screen and (min-width: 750px) {
     .eva-tiles__list {
       grid-auto-flow: row;

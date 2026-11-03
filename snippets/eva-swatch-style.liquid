@@ -1,0 +1,31 @@
+{%- doc -%}
+  Outputs the inline CSS that paints a colour swatch: Shopify's native swatch image or colour first,
+  then the Option A colourways matched by name. Outputs nothing for unknown colours, which then show
+  as an outlined dot.
+
+  @param {object} [swatch] - A swatch object (product_option_value.swatch or filter_value.swatch).
+  @param {string} [name] - The colour name, used when there is no native swatch.
+
+  @example
+  {%- capture swatch_style -%}{% render 'eva-swatch-style', swatch: value.swatch, name: value.name %}{%- endcapture -%}
+{%- enddoc -%}
+
+{%- if swatch.image -%}
+  background-image: url({{ swatch.image | image_url: width: 80 }});
+{%- elsif swatch.color -%}
+  background-color: {{ swatch.color }};
+{%- else -%}
+  {%- assign colour_key = name | downcase | strip -%}
+  {%- case colour_key -%}
+    {%- when 'noir', 'black' -%}
+      background-color: #1C1518;
+    {%- when 'blush' -%}
+      background-color: #E8C4C0;
+    {%- when 'champagne' -%}
+      background-color: #F2E6DA;
+    {%- when 'wine' -%}
+      background-color: #6B1F2E;
+    {%- when 'ivory', 'white' -%}
+      background-color: #FBF7F4;
+  {%- endcase -%}
+{%- endif -%}

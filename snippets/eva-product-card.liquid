@@ -1,12 +1,14 @@
 {%- doc -%}
-  Lean product card: image, title, colour names ("Noir · Blush · +2 more") and price. No JavaScript.
-  The whole card is clickable through the title link, so keyboard users get one tab stop per card.
-  Renders a placeholder card when `product` is blank (theme editor onboarding).
+  Lean product card: image, title, colourways and price. No JavaScript.
+  Colourways show as names ("Noir · Blush · +2 more", home page) or as swatch dots ("● ● ● +1 more",
+  collection grid). The whole card is clickable through the title link, so keyboard users get one
+  tab stop per card. Renders a placeholder card when `product` is blank (theme editor onboarding).
 
   @param {product} [product] - The product to show.
   @param {string} [sizes] - The `sizes` attribute for the card image.
   @param {string} [loading] - 'lazy' (default) or 'eager' for cards in the first viewport.
   @param {boolean} [show_secondary_image] - Show the second product image on hover. Defaults to false.
+  @param {string} [colour_display] - 'names' (default) or 'swatches'.
   @param {number} [placeholder_index] - Picks the placeholder illustration (1-4) when `product` is blank.
 
   @example
@@ -103,7 +105,39 @@
       </a>
     </h3>
 
-    {%- if colour_option != nil and colour_option.values.size > 0 -%}
+    {%- if colour_display == 'swatches' -%}
+      {%- if colour_option != nil and colour_option.values.size > 1 -%}
+        {%- liquid
+          assign shown_colours = colour_option.values | slice: 0, 3
+          assign more_colours = colour_option.values.size | minus: 3
+        -%}
+        <p class="eva-card__swatches">
+          <span class="visually-hidden">
+            {{- 'eva.card.colours' | t }}: {{ colour_option.values | map: 'name' | join: ', ' | escape -}}
+          </span>
+          {%- for colour in shown_colours -%}
+            {%- capture swatch_style -%}
+              {%- render 'eva-swatch-style', swatch: colour.swatch, name: colour.name -%}
+            {%- endcapture -%}
+            <span
+              class="eva-card__swatch"
+              {% if swatch_style != blank %}
+                style="{{ swatch_style }}"
+              {% endif %}
+              aria-hidden="true"
+            ></span>
+          {%- endfor -%}
+          {%- if more_colours > 0 -%}
+            <span
+              class="eva-card__more"
+              aria-hidden="true"
+            >
+              {{- 'eva.card.more_colours' | t: count: more_colours -}}
+            </span>
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+    {%- elsif colour_option != nil and colour_option.values.size > 0 -%}
       {%- liquid
         assign shown_colours = colour_option.values | slice: 0, 2
         assign more_colours = colour_option.values.size | minus: 2
@@ -182,8 +216,8 @@
     inset-inline-start: 0.75rem;
     margin: 0;
     padding: 0.3125rem 0.625rem;
-    background-color: var(--eva-ivory);
-    color: var(--eva-charcoal);
+    background-color: var(--eva-wine);
+    color: var(--eva-ivory);
     font-family: var(--font-subheading--family);
     font-weight: var(--font-subheading--weight);
     font-size: 0.625rem;
@@ -228,6 +262,28 @@
     margin: 0;
     font-size: 0.75rem;
     line-height: 1.5;
+    color: var(--eva-muted, currentcolor);
+  }
+
+  .eva-card__swatches {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0.125rem 0;
+  }
+
+  .eva-card__swatch {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--eva-line, var(--eva-border));
+    background-color: transparent;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .eva-card__more {
+    font-size: 0.6875rem;
     color: var(--eva-muted, currentcolor);
   }
 

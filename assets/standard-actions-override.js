@@ -1,24 +1,20 @@
 /**
- * Horizon overrides for Shopify.actions:
- * - updateCart: emit events from the cart drawer scope.
- * - openCart: open the cart drawer (fall back to /cart when absent).
+ * Eva overrides for Shopify.actions:
+ * - openCart: open the Eva cart drawer (fall back to /cart when absent).
+ * Cart update events keep Shopify's default target (document), where the drawer listens for them.
  */
 
 function init() {
   const actions = window.Shopify?.actions;
   if (!actions) return;
 
-  actions.updateCart.configure({
-    eventTarget: () => document.querySelector('theme-drawer#cart-drawer') ?? document,
-  });
-
   actions.openCart.configure({
     async handler() {
-      /** @type {HTMLElement & {open?: () => void} | null} */
-      const drawer = document.querySelector('theme-drawer#cart-drawer');
+      /** @type {HTMLElement & {showDialog?: () => void} | null} */
+      const drawer = document.getElementById('eva-cart-drawer');
 
-      if (drawer?.open) {
-        drawer.open();
+      if (drawer?.showDialog) {
+        drawer.showDialog();
       } else {
         window.location.href = Theme.routes.cart_url || '/cart';
       }

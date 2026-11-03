@@ -1,0 +1,324 @@
+{%- liquid
+  assign columns = section.settings.columns | plus: 0
+  assign card_vw = 100 | divided_by: columns
+  assign sizes = '(min-width: 990px) ' | append: card_vw | append: 'vw, 50vw'
+  assign drawer_id = 'EvaSearchFilters-' | append: section.id
+
+  # The listing URL without filters or sorting: the terms, the searched types and prefix matching.
+  assign encoded_terms = search.terms | url_encode
+  assign base_url = routes.search_url | append: '?q=' | append: encoded_terms
+  if search.types.size > 0
+    assign search_types = search.types | join: ','
+    assign base_url = base_url | append: '&type=' | append: search_types
+  endif
+  assign base_url = base_url | append: '&options%5Bprefix%5D=last'
+-%}
+
+{%- capture filter_query -%}{%- render 'eva-filter-query', results: search -%}{%- endcapture -%}
+{%- assign filter_query = filter_query | strip -%}
+
+<div
+  class="eva-search eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-columns: {{ columns }}; --eva-card-ratio: {{ section.settings.image_ratio }};"
+>
+  <div class="eva-page">
+    <div class="eva-search__header">
+      <h1 class="eva-heading eva-heading--md">
+        {%- if search.performed -%}
+          {{- 'eva.search.results_for' | t: terms: search.terms -}}
+        {%- else -%}
+          {{- 'eva.search.title' | t -}}
+        {%- endif -%}
+      </h1>
+      {%- render 'eva-search-form', id_prefix: 'EvaSearchPage', terms: search.terms -%}
+    </div>
+
+    {%- if search.performed -%}
+      <div class="eva-search__toolbar">
+        <p class="eva-caption">{{ 'eva.search.result_count' | t: count: search.results_count }}</p>
+        {%- render 'eva-facet-actions',
+          results: search,
+          base_url: base_url,
+          drawer_id: drawer_id,
+          show_filter: section.settings.enable_filtering,
+          show_sort: section.settings.enable_sorting
+        -%}
+      </div>
+
+      {%- render 'eva-active-filters', results: search, base_url: base_url -%}
+
+      {%- paginate search.results by section.settings.results_per_page -%}
+        {%- if search.results.size > 0 -%}
+          <h2 class="visually-hidden">{{ 'eva.search.results_heading' | t }}</h2>
+          <ul
+            class="eva-search__grid"
+            role="list"
+          >
+            {%- for item in search.results -%}
+              <li>
+                {%- if item.object_type == 'product' -%}
+                  {%- liquid
+                    assign card_loading = 'lazy'
+                    if forloop.index <= columns
+                      assign card_loading = 'eager'
+                    endif
+                  -%}
+                  {%- render 'eva-product-card',
+                    product: item,
+                    sizes: sizes,
+                    loading: card_loading,
+                    colour_display: section.settings.colour_display
+                  -%}
+                {%- else -%}
+                  <article class="eva-result">
+                    {%- if item.object_type == 'article' and item.image != blank -%}
+                      <div class="eva-result__media eva-media">
+                        {{
+                          item.image
+                          | image_url: width: 800
+                          | image_tag: widths: '300, 400, 600, 800', sizes: sizes, loading: 'lazy', alt: ''
+                        }}
+                      </div>
+                    {%- endif -%}
+                    <p class="eva-eyebrow">
+                      {%- if item.object_type == 'article' -%}
+                        {{- 'eva.search.type_article' | t -}}
+                      {%- else -%}
+                        {{- 'eva.search.type_page' | t -}}
+                      {%- endif -%}
+                    </p>
+                    <h3 class="eva-result__title">
+                      <a
+                        href="{{ item.url }}"
+                        class="eva-result__link"
+                      >
+                        {{- item.title | escape -}}
+                      </a>
+                    </h3>
+                    {%- assign excerpt = item.excerpt_or_content | default: item.content | strip_html | strip -%}
+                    {%- if excerpt != blank -%}
+                      <p class="eva-caption">{{ excerpt | truncatewords: 22 }}</p>
+                    {%- endif -%}
+                  </article>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- else -%}
+          <div class="eva-search__empty">
+            <p class="eva-heading eva-heading--xs">{{ 'eva.search.no_results' | t: terms: search.terms }}</p>
+            <p class="eva-caption">{{ 'eva.search.no_results_hint' | t }}</p>
+            {%- if filter_query != blank -%}
+              <a
+                href="{{ base_url | escape }}"
+                class="eva-link"
+                rel="nofollow"
+              >
+                {{- 'eva.collection.clear_all' | t -}}
+              </a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <div class="eva-search__pagination">
+          {%- render 'eva-pagination', paginate: paginate -%}
+        </div>
+      {%- endpaginate -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{%- if search.performed and section.settings.enable_filtering -%}
+  {%- render 'eva-filter-drawer', results: search, base_url: base_url, drawer_id: drawer_id -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-search__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    margin-block-end: clamp(2rem, 5vw, 3rem);
+    text-align: center;
+  }
+
+  .eva-search__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-end: 1.25rem;
+  }
+
+  .eva-search__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-result {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 1.25rem;
+    border: 1px solid var(--eva-line);
+  }
+
+  .eva-result__media {
+    aspect-ratio: 4 / 3;
+    margin: -1.25rem -1.25rem 0.5rem;
+  }
+
+  .eva-result__title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: 1.375rem;
+    line-height: 1.2;
+  }
+
+  .eva-result__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-result__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .eva-result:has(.eva-result__link:focus-visible) {
+    outline: 2px solid currentcolor;
+    outline-offset: 2px;
+  }
+
+  .eva-result__link:focus-visible {
+    outline: none;
+  }
+
+  .eva-search__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 3rem;
+    text-align: center;
+  }
+
+  .eva-search__pagination {
+    margin-block-start: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  @media screen and (min-width: 990px) {
+    .eva-search__grid {
+      grid-template-columns: repeat(var(--eva-columns, 4), minmax(0, 1fr));
+      gap: 2.5rem 1.25rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.main_search",
+  "class": "eva-main-search-section",
+  "enabled_on": {
+    "templates": ["search"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "results_per_page",
+      "label": "t:eva.settings.products_per_page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "t:eva.settings.columns_desktop",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "t:eva.settings.image_ratio",
+      "options": [
+        { "value": "3 / 4", "label": "3:4" },
+        { "value": "4 / 5", "label": "4:5" },
+        { "value": "2 / 3", "label": "2:3" }
+      ],
+      "default": "3 / 4"
+    },
+    {
+      "type": "select",
+      "id": "colour_display",
+      "label": "t:eva.settings.colour_display",
+      "options": [
+        { "value": "swatches", "label": "t:eva.options.swatches" },
+        { "value": "names", "label": "t:eva.options.colour_names" }
+      ],
+      "default": "swatches"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "t:eva.settings.enable_filtering",
+      "info": "t:eva.info.enable_filtering",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "t:eva.settings.enable_sorting",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    }
+  ]
+}
+{% endschema %}

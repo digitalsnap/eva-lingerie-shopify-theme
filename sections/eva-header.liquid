@@ -9,9 +9,9 @@
 -%}
 
 {%- comment -%}
-  Reuses Horizon's cart-icon (live cart count), #cart-drawer, #search-modal and dialog-component,
-  so this header adds no JavaScript of its own. The id and data-sticky-state attribute keep
-  Horizon's product page sticky offsets working.
+  Reuses Horizon's cart-icon (live cart count), #search-modal and dialog-component, and opens the
+  Eva cart drawer (#eva-cart-drawer), so this header adds no JavaScript of its own. The id and
+  data-sticky-state attribute keep `--header-height` consumers working.
 {%- endcomment -%}
 <script
   src="{{ 'cart-icon.js' | asset_url }}"
@@ -152,10 +152,9 @@
         <button
           type="button"
           class="eva-icon-button"
-          on:click="#cart-drawer/toggle"
+          on:click="#eva-cart-drawer/showDialog"
           aria-haspopup="dialog"
-          aria-expanded="false"
-          aria-controls="cart-drawer"
+          aria-controls="eva-cart-drawer"
           aria-label="{{ 'eva.header.cart' | t }}"
           aria-describedby="cart-bubble-text"
         >
@@ -456,53 +455,7 @@
     }
   }
 
-  /* Mobile menu drawer */
-
-  .eva-drawer {
-    width: min(24rem, 100vw);
-    max-width: 100vw;
-    height: 100dvh;
-    max-height: 100dvh;
-    margin: 0;
-    margin-inline-end: auto;
-    padding: 0 1.5rem 2rem;
-    border: 0;
-    border-radius: 0;
-    overflow-y: auto;
-  }
-
-  .eva-drawer::backdrop {
-    background-color: rgb(43 34 38 / 0.45);
-  }
-
-  .eva-drawer[open] {
-    animation: eva-drawer-in 0.3s var(--eva-ease);
-  }
-
-  .eva-drawer.dialog-closing {
-    animation: eva-drawer-out 0.2s var(--eva-ease) forwards;
-  }
-
-  @keyframes eva-drawer-in {
-    from {
-      translate: -100% 0;
-    }
-  }
-
-  @keyframes eva-drawer-out {
-    to {
-      translate: -100% 0;
-    }
-  }
-
-  .eva-drawer__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: var(--eva-header-height);
-    margin-inline-end: -0.75rem;
-    border-block-end: 1px solid var(--eva-line);
-  }
+  /* Mobile menu drawer (the drawer shell lives in eva-base.css) */
 
   .eva-drawer__menu > li {
     border-block-end: 1px solid var(--eva-line);

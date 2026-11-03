@@ -1,0 +1,152 @@
+{%- liquid
+  assign image = nil
+  if section.settings.show_image
+    assign image = collection.image
+  endif
+-%}
+
+<div
+  class="eva-collection-banner eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"
+>
+  {%- if image != blank -%}
+    <div class="eva-collection-banner__media">
+      {%- comment -%} The collection banner is the page's Largest Contentful Paint candidate. {%- endcomment -%}
+      {{
+        image
+        | image_url: width: 3200
+        | image_tag:
+          widths: '375, 550, 750, 1100, 1500, 1800, 2200, 2800, 3200',
+          sizes: '100vw',
+          loading: 'eager',
+          fetchpriority: 'high',
+          preload: true,
+          alt: '',
+          class: 'eva-collection-banner__image'
+        }}
+    </div>
+  {%- endif -%}
+
+  <div class="eva-page eva-collection-banner__content">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="eva-eyebrow eva-collection-banner__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+    {%- endif -%}
+
+    <h1 class="eva-heading eva-heading--lg">{{ collection.title | escape }}</h1>
+
+    {%- if section.settings.show_description and collection.description != blank -%}
+      <div class="eva-body eva-rte eva-collection-banner__description">{{ collection.description }}</div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .eva-collection-banner {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    min-height: clamp(13rem, 23vw, 22rem);
+  }
+
+  .eva-collection-banner__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .eva-collection-banner__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--eva-bg);
+    opacity: var(--eva-overlay, 0);
+  }
+
+  .eva-collection-banner__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .eva-collection-banner__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+    padding-block: clamp(2.5rem, 6vw, 4rem);
+    text-align: center;
+  }
+
+  /* Over photography the eyebrow takes the text colour; antique gold is not legible on images. */
+  .eva-collection-banner__media ~ .eva-collection-banner__content .eva-collection-banner__eyebrow {
+    color: inherit;
+  }
+
+  .eva-collection-banner__description {
+    max-inline-size: 36rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.collection_banner",
+  "class": "eva-collection-banner-section",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:eva.content.collection_banner_info"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:eva.settings.eyebrow",
+      "default": "Collection"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "t:eva.settings.show_description",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "t:eva.settings.show_collection_image",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:eva.settings.overlay_opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "info": "t:eva.info.banner_color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" },
+        { "value": "plum", "label": "t:eva.options.plum" },
+        { "value": "charcoal", "label": "t:eva.options.charcoal" }
+      ],
+      "default": "blush"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.collection_banner"
+    }
+  ]
+}
+{% endschema %}

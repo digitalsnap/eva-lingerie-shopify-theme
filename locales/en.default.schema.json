@@ -1250,11 +1250,25 @@
       "category_tiles": "Eva category tiles",
       "featured_collection": "Eva featured collection",
       "media_text": "Eva image with text",
-      "newsletter": "Eva newsletter"
+      "newsletter": "Eva newsletter",
+      "collection_banner": "Eva collection banner",
+      "main_collection": "Eva collection products",
+      "main_product": "Eva product",
+      "product_recommendations": "Eva complete the set",
+      "main_cart": "Eva cart",
+      "main_search": "Eva search results",
+      "main_404": "Eva 404",
+      "main_page": "Eva page",
+      "contact_form": "Eva contact form",
+      "main_blog": "Eva journal",
+      "main_article": "Eva article",
+      "main_list_collections": "Eva collections list",
+      "cart_drawer": "Eva cart drawer"
     },
     "blocks": {
       "footer_menu": "Footer menu",
-      "category_tile": "Category tile"
+      "category_tile": "Category tile",
+      "product_accordion": "Product details row"
     },
     "presets": {
       "hero": "Eva hero",
@@ -1269,7 +1283,12 @@
       "spacing": "Spacing",
       "media": "Media",
       "content": "Content",
-      "newsletter_info": "Sign-ups are saved as customers tagged newsletter, with email marketing consent."
+      "newsletter_info": "Sign-ups are saved as customers tagged newsletter, with email marketing consent.",
+      "collection_banner_info": "Shows the title, description and image set on each collection in Products > Collections.",
+      "category_pills": "Category pills",
+      "filtering": "Filtering and sorting",
+      "size_guide": "Size guide",
+      "cart_info": "Discount codes, order notes and accelerated checkout buttons follow Theme settings > Cart."
     },
     "settings": {
       "ivory": "Ivory (page ground)",
@@ -1323,7 +1342,34 @@
       "columns_desktop": "Columns on desktop",
       "show_secondary_image": "Show second image on hover",
       "image_position": "Image position",
-      "placeholder": "Email placeholder"
+      "placeholder": "Email placeholder",
+      "show_description": "Show collection description",
+      "show_collection_image": "Show collection image",
+      "products_per_page": "Products per page",
+      "colour_display": "Colourways on cards",
+      "pills_source": "Source",
+      "pills_filter_label": "Filter name or URL parameter",
+      "enable_filtering": "Enable filtering",
+      "enable_sorting": "Enable sorting",
+      "show_breadcrumbs": "Show breadcrumbs",
+      "show_tax_note": "Show tax and shipping note",
+      "size_option_name": "Size option name",
+      "size_guide_page": "Size guide page",
+      "size_guide_label": "Size guide link label",
+      "info_text": "Delivery and returns line",
+      "show_description_product": "Show product description",
+      "show_dynamic_checkout": "Show accelerated checkout buttons",
+      "metafield": "Metafield",
+      "content": "Content",
+      "open_by_default": "Open by default",
+      "recommendation_intent": "Fallback recommendations",
+      "continue_link": "Continue shopping link",
+      "content_width": "Content width",
+      "show_phone": "Show phone field",
+      "show_tags": "Show topic filter",
+      "articles_per_page": "Articles per page",
+      "show_author": "Show author",
+      "collections_per_page": "Collections per page"
     },
     "info": {
       "gold_text": "Antique gold fails contrast on ivory and blush, so small gold text there uses this darker tone.",
@@ -1342,7 +1388,18 @@
       "tile_link": "Defaults to the collection.",
       "hide_heading": "Keeps the heading for screen readers and search engines.",
       "featured_heading": "Defaults to the collection title.",
-      "show_secondary_image": "Loads one extra image per product."
+      "show_secondary_image": "Loads one extra image per product.",
+      "pills_source": "Menu: the sub-links under the current collection in the chosen menu, for example Bras > Balconette, Plunge. Filter: the values of one storefront filter.",
+      "pills_filter_label": "The filter name from the Search & Discovery app, or its URL parameter (for example filter.p.m.custom.style), which keeps working on translated storefronts.",
+      "enable_filtering": "Filters are set up in the Search & Discovery app.",
+      "size_option_name": "The option whose values get the size guide link, for example Size or Band size.",
+      "size_guide_page": "Opens in a side panel next to the size options.",
+      "show_dynamic_checkout": "Adds Shop Pay, Apple Pay and similar buttons. They load extra scripts and slow the page.",
+      "accordion_metafield": "For example custom.fit_fabric. When a product has this metafield, it replaces the content below.",
+      "accordion_content": "Shown for products without the metafield. The row is hidden when both are empty.",
+      "recommendations_metafield": "A product list metafield, for example custom.complete_the_set. Products without it fall back to Shopify's recommendations.",
+      "recommendation_intent": "Complementary products are chosen in the Search & Discovery app.",
+      "quick_add": "Leave off with the Eva product page: quick add reads the original Horizon product layout, which Eva replaces."
     },
     "options": {
       "ivory": "Ivory",
@@ -1361,7 +1418,19 @@
       "primary_wine": "Primary (wine)",
       "gold": "Gold",
       "left": "Left",
-      "right": "Right"
+      "right": "Right",
+      "swatches": "Swatches",
+      "colour_names": "Colour names",
+      "pills_menu": "Menu",
+      "pills_filter": "Filter",
+      "none": "None",
+      "collection": "Collection",
+      "product_type": "Product type",
+      "vendor": "Vendor",
+      "complementary": "Complementary",
+      "related": "Related",
+      "narrow": "Narrow",
+      "wide": "Wide"
     }
   }
 }

@@ -1,0 +1,100 @@
+{%- doc -%}
+  Journal card: image, date, title and a short excerpt. The whole card is clickable through the
+  title link (one tab stop).
+
+  @param {article} article - The article to show.
+  @param {string} [sizes] - The image `sizes` attribute.
+  @param {string} [loading] - 'lazy' (default) or 'eager'.
+  @param {string} [heading_tag] - Tag for the title. Defaults to 'h2'.
+
+  @example
+  {% render 'eva-article-card', article: article, sizes: '(min-width: 990px) 33vw, 100vw' %}
+{%- enddoc -%}
+
+{%- liquid
+  assign heading_tag = heading_tag | default: 'h2'
+  assign card_sizes = sizes | default: '(min-width: 990px) 33vw, 100vw'
+  assign card_loading = loading | default: 'lazy'
+  assign excerpt = article.excerpt_or_content | strip_html | strip
+-%}
+
+<article class="eva-article-card">
+  <div class="eva-article-card__media eva-media">
+    {%- if article.image != blank -%}
+      {{
+        article.image
+        | image_url: width: 1200
+        | image_tag:
+          widths: '375, 550, 750, 1000, 1200',
+          sizes: card_sizes,
+          loading: card_loading,
+          alt: ''
+      }}
+    {%- else -%}
+      {{- 'lifestyle-2' | placeholder_svg_tag: 'eva-placeholder' -}}
+    {%- endif -%}
+  </div>
+  <p class="eva-caption eva-article-card__date">{{ article.published_at | time_tag: format: 'date' }}</p>
+  <{{ heading_tag }} class="eva-article-card__title">
+    <a
+      href="{{ article.url }}"
+      class="eva-article-card__link"
+    >
+      {{- article.title | escape -}}
+    </a>
+  </{{ heading_tag }}>
+  {%- if excerpt != blank -%}
+    <p class="eva-caption eva-article-card__excerpt">{{ excerpt | truncatewords: 26 }}</p>
+  {%- endif -%}
+</article>
+
+{% stylesheet %}
+  .eva-article-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .eva-article-card__media {
+    aspect-ratio: 3 / 2;
+    margin-block-end: 0.75rem;
+  }
+
+  .eva-article-card__media img {
+    transition: transform 0.6s var(--eva-ease);
+  }
+
+  .eva-article-card:hover .eva-article-card__media img {
+    transform: scale(1.03);
+  }
+
+  .eva-article-card__title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: clamp(1.375rem, 1.1rem + 0.6vw, 1.75rem);
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .eva-article-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-article-card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .eva-article-card__link:focus-visible {
+    outline: none;
+  }
+
+  .eva-article-card:has(.eva-article-card__link:focus-visible) {
+    outline: 2px solid currentcolor;
+    outline-offset: 4px;
+  }
+{% endstylesheet %}

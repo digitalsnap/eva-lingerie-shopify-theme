@@ -1,0 +1,1005 @@
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign initial_media = selected_variant.featured_media | default: product.featured_media
+
+  # The selected variant's image leads the gallery, so the visible first slide is the eagerly loaded
+  # LCP image even on ?variant= links. It appears twice in the list; the loops skip the repeat.
+  assign media_first = product.media | where: 'id', initial_media.id
+  assign ordered_media = media_first | concat: product.media
+  assign form_id = 'EvaProductForm-' | append: section.id
+  assign gallery_id = 'EvaGallery-' | append: section.id
+  assign size_guide_id = 'EvaSizeGuide-' | append: section.id
+  assign size_guide = section.settings.size_guide_page
+  assign size_option_name = section.settings.size_option_name | downcase | strip
+
+  # Breadcrumb and eyebrow collection: the one the visitor came through, else the first real one.
+  assign breadcrumb_collection = collection
+  if breadcrumb_collection == blank
+    for product_collection in product.collections
+      if product_collection.handle != 'all' and product_collection.handle != 'frontpage'
+        assign breadcrumb_collection = product_collection
+        break
+      endif
+    endfor
+  endif
+
+  case section.settings.eyebrow_source
+    when 'collection'
+      assign eyebrow = breadcrumb_collection.title
+    when 'type'
+      assign eyebrow = product.type
+    when 'vendor'
+      assign eyebrow = product.vendor
+    else
+      assign eyebrow = ''
+  endcase
+
+  assign on_sale = false
+  if selected_variant.compare_at_price > selected_variant.price
+    assign on_sale = true
+  endif
+-%}
+
+<script
+  src="{{ 'eva-product.js' | asset_url }}"
+  type="module"
+></script>
+
+<div
+  class="eva-product eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-media-ratio: {{ section.settings.media_ratio }};"
+>
+  <div class="eva-page">
+    {%- if section.settings.show_breadcrumbs -%}
+      <nav
+        class="eva-breadcrumbs"
+        aria-label="{{ 'eva.product.breadcrumb' | t }}"
+      >
+        <ol role="list">
+          <li><a href="{{ routes.root_url }}">{{ 'eva.breadcrumbs.home' | t }}</a></li>
+          {%- if breadcrumb_collection != blank -%}
+            <li><a href="{{ breadcrumb_collection.url }}">{{ breadcrumb_collection.title | escape }}</a></li>
+          {%- endif -%}
+          <li aria-current="page">{{ product.title | escape }}</li>
+        </ol>
+      </nav>
+    {%- endif -%}
+
+    <div class="eva-product__grid">
+      <eva-gallery
+        id="{{ gallery_id }}"
+        class="eva-gallery{% if product.media.size > 1 %} eva-gallery--has-thumbs{% endif %}"
+      >
+        {%- if product.media.size > 1 -%}
+          <ul
+            class="eva-gallery__thumbs"
+            role="list"
+          >
+            {%- assign media_number = 0 -%}
+            {%- for media in ordered_media -%}
+              {%- if forloop.index > 1 and media.id == initial_media.id -%}
+                {%- continue -%}
+              {%- endif -%}
+              {%- assign media_number = media_number | plus: 1 -%}
+              <li>
+                <button
+                  type="button"
+                  class="eva-gallery__thumb eva-media"
+                  data-media-id="{{ media.id }}"
+                  aria-label="{{ 'eva.product.show_media' | t: number: media_number }}"
+                  {% if media_number == 1 %}
+                    aria-current="true"
+                  {% endif %}
+                >
+                  {{
+                    media.preview_image
+                    | image_url: width: 160
+                    | image_tag: widths: '80, 160', sizes: '72px', loading: 'lazy', alt: ''
+                  }}
+                </button>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        <div class="eva-gallery__viewport">
+          <div
+            class="eva-gallery__track"
+            role="region"
+            tabindex="0"
+            aria-label="{{ 'eva.product.gallery' | t: title: product.title }}"
+          >
+            {%- for media in ordered_media -%}
+              {%- if forloop.index > 1 and media.id == initial_media.id -%}
+                {%- continue -%}
+              {%- endif -%}
+              {%- liquid
+                assign is_initial = forloop.first
+                assign media_alt = media.alt | default: product.title
+              -%}
+              <div
+                class="eva-gallery__slide eva-media"
+                data-media-id="{{ media.id }}"
+              >
+                {%- case media.media_type -%}
+                  {%- when 'video' -%}
+                    {{
+                      media
+                      | video_tag:
+                        controls: true,
+                        playsinline: true,
+                        preload: 'none',
+                        image_size: '1200x',
+                        class: 'eva-gallery__video'
+                    }}
+                  {%- when 'external_video' -%}
+                    {{ media | external_video_tag: class: 'eva-gallery__video', loading: 'lazy' }}
+                  {%- else -%}
+                    {%- comment -%} The selected variant's image is the Largest Contentful Paint candidate. {%- endcomment -%}
+                    {%- if is_initial -%}
+                      {{
+                        media.preview_image
+                        | image_url: width: 2000
+                        | image_tag:
+                          widths: '375, 550, 750, 1000, 1300, 1600, 2000',
+                          sizes: '(min-width: 990px) 45vw, 100vw',
+                          loading: 'eager',
+                          fetchpriority: 'high',
+                          preload: true,
+                          alt: media_alt
+                      }}
+                    {%- else -%}
+                      {{
+                        media.preview_image
+                        | image_url: width: 2000
+                        | image_tag:
+                          widths: '375, 550, 750, 1000, 1300, 1600, 2000',
+                          sizes: '(min-width: 990px) 45vw, 100vw',
+                          loading: 'lazy',
+                          alt: media_alt
+                      }}
+                    {%- endif -%}
+                {%- endcase -%}
+              </div>
+            {%- else -%}
+              <div class="eva-gallery__slide eva-media">
+                {{- 'product-apparel-1' | placeholder_svg_tag: 'eva-placeholder' -}}
+              </div>
+            {%- endfor -%}
+          </div>
+
+          {%- if product.media.size > 1 -%}
+            <p
+              class="eva-gallery__counter"
+              aria-hidden="true"
+            >
+              <span data-gallery-current>1</span> / {{ product.media.size }}
+            </p>
+          {%- endif -%}
+        </div>
+      </eva-gallery>
+
+      <div class="eva-product__info">
+        {%- if eyebrow != blank -%}
+          <p class="eva-eyebrow">{{ eyebrow | escape }}</p>
+        {%- endif -%}
+
+        <h1 class="eva-heading eva-product__title">{{ product.title | escape }}</h1>
+
+        <eva-product-form
+          class="eva-product__buy"
+          data-product-id="{{ product.id }}"
+          data-product-url="{{ product.url }}"
+          data-section-id="{{ section.id }}"
+          data-variants-count="{{ product.variants_count }}"
+          data-selected-media="{{ selected_variant.featured_media.id }}"
+          data-gallery="{{ gallery_id }}"
+          data-label-add="{{ 'eva.product.add_to_bag' | t | escape }}"
+          data-label-sold-out="{{ 'eva.product.sold_out' | t | escape }}"
+          data-label-unavailable="{{ 'eva.product.unavailable' | t | escape }}"
+          data-label-added="{{ 'eva.product.added' | t | escape }}"
+          data-label-added-short="{{ 'eva.product.added_short' | t | escape }}"
+          data-label-value-sold-out="{{ 'eva.product.value_sold_out' | t | escape }}"
+          data-label-error="{{ 'eva.product.add_error' | t | escape }}"
+        >
+          <div
+            class="eva-product__price"
+            data-price
+          >
+            <span
+              class="visually-hidden"
+              data-sale-label
+              {% unless on_sale %}
+                hidden
+              {% endunless %}
+            >
+              {{- 'eva.card.sale_price' | t -}}
+            </span>
+            <span data-price-current>{{ selected_variant.price | money }}</span>
+            <span
+              class="eva-product__compare"
+              data-compare
+              {% unless on_sale %}
+                hidden
+              {% endunless %}
+            >
+              <span class="visually-hidden">{{ 'eva.card.regular_price' | t }}</span>
+              <s data-price-compare>
+                {%- if on_sale -%}{{ selected_variant.compare_at_price | money }}{%- endif -%}
+              </s>
+            </span>
+          </div>
+
+          {%- if section.settings.show_tax_note -%}
+            <p class="eva-caption eva-product__tax">
+              {%- if shop.taxes_included -%}
+                {{ 'eva.product.tax_included' | t }}
+              {%- else -%}
+                {{ 'eva.product.tax_excluded' | t }}
+              {%- endif %}
+              {% if shop.shipping_policy.body != blank -%}
+                {{ 'eva.product.shipping_at_checkout_html' | t: link: shop.shipping_policy.url }}
+              {%- else -%}
+                {{ 'eva.product.shipping_at_checkout' | t }}
+              {%- endif -%}
+            </p>
+          {%- endif -%}
+
+          {%- form 'product', product, id: form_id, class: 'eva-product__form', novalidate: 'novalidate' -%}
+            <input
+              type="hidden"
+              name="id"
+              value="{{ selected_variant.id }}"
+              data-variant-input
+            >
+
+            {%- unless product.has_only_default_variant -%}
+              {%- comment -%}
+                Without JavaScript the option buttons can't change the variant, so a plain select
+                takes over. It comes after the hidden input, and the last `id` in a form post wins.
+              {%- endcomment -%}
+              <noscript>
+                <style>
+                  .eva-product__options { display: none; }
+                  eva-product-form .eva-product__add { pointer-events: auto; }
+                </style>
+                <label
+                  class="eva-option__legend"
+                  for="{{ form_id }}-Variant"
+                >
+                  {{- 'eva.product.choose_variant' | t -}}
+                </label>
+                <select
+                  id="{{ form_id }}-Variant"
+                  name="id"
+                  class="eva-product__select"
+                >
+                  {%- for variant in product.variants -%}
+                    <option
+                      value="{{ variant.id }}"
+                      {% if variant.id == selected_variant.id %}
+                        selected
+                      {% endif %}
+                      {% unless variant.available %}
+                        disabled
+                      {% endunless %}
+                    >
+                      {{- variant.title | escape }} – {{ variant.price | money | strip_html -}}
+                    </option>
+                  {%- endfor -%}
+                </select>
+              </noscript>
+
+              <div class="eva-product__options">
+              {%- for option in product.options_with_values -%}
+                {%- liquid
+                  assign option_key = option.name | downcase | strip
+                  assign is_colour = false
+                  if option_key == 'color' or option_key == 'colour' or option.values.first.swatch != blank
+                    assign is_colour = true
+                  endif
+                  assign is_size = false
+                  if option_key == size_option_name
+                    assign is_size = true
+                  endif
+                -%}
+                <fieldset
+                  class="eva-option{% if is_colour %} eva-option--swatches{% endif %}"
+                  data-option-index="{{ forloop.index0 }}"
+                >
+                  <legend class="eva-option__legend">
+                    {{- option.name | escape -}}
+                    {%- if is_colour -%}
+                      :
+                      <span
+                        class="eva-option__selected"
+                        data-selected-value
+                      >
+                        {{- option.selected_value | escape -}}
+                      </span>
+                    {%- endif -%}
+                  </legend>
+
+                  {%- if is_size and size_guide != blank -%}
+                    <button
+                      type="button"
+                      class="eva-link eva-option__guide"
+                      on:click="#{{ size_guide_id }}/showDialog"
+                      aria-haspopup="dialog"
+                    >
+                      {{- section.settings.size_guide_label | escape -}}
+                    </button>
+                  {%- endif -%}
+
+                  <div class="eva-option__values">
+                    {%- for value in option.values -%}
+                      {%- if is_colour -%}
+                        {%- capture swatch_style -%}
+                          {%- render 'eva-swatch-style', swatch: value.swatch, name: value.name -%}
+                        {%- endcapture -%}
+                      {%- endif -%}
+                      <label class="eva-option__value{% if is_colour %} eva-option__value--swatch{% endif %}{% unless value.available %} is-unavailable{% endunless %}">
+                        <input
+                          class="eva-option__input"
+                          type="radio"
+                          name="option-{{ section.id }}-{{ option.position }}"
+                          value="{{ value.name | escape }}"
+                          data-value-id="{{ value.id }}"
+                          {% if value.selected %}
+                            checked
+                          {% endif %}
+                        >
+                        {%- if is_colour -%}
+                          <span
+                            class="eva-option__swatch"
+                            {% if swatch_style != blank %}
+                              style="{{ swatch_style | strip }}"
+                            {% endif %}
+                            aria-hidden="true"
+                          ></span>
+                          <span class="visually-hidden">{{ value.name | escape }}</span>
+                        {%- else -%}
+                          <span>{{ value.name | escape }}</span>
+                        {%- endif -%}
+                        <span
+                          class="visually-hidden"
+                          data-value-status
+                        >
+                          {%- unless value.available %}, {{ 'eva.product.value_sold_out' | t }}{% endunless -%}
+                        </span>
+                      </label>
+                    {%- endfor -%}
+                  </div>
+                </fieldset>
+              {%- endfor -%}
+              </div>
+
+              <script
+                type="application/json"
+                data-eva-variants
+              >
+                [
+                  {%- for variant in product.variants -%}
+                    {
+                      "id": {{ variant.id }},
+                      "options": {{ variant.options | json }},
+                      "available": {{ variant.available | json }},
+                      "price": {{ variant.price | money | strip_html | json }},
+                      "compare": {% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price | money | strip_html | json }}{% else %}null{% endif %},
+                      "media": {{ variant.featured_media.id | default: 'null' }}
+                    }
+                    {%- unless forloop.last %},{% endunless -%}
+                  {%- endfor -%}
+                ]
+              </script>
+            {%- endunless -%}
+
+            <button
+              type="submit"
+              name="add"
+              class="eva-button eva-button--primary eva-product__add"
+              data-add-button
+              {% unless selected_variant.available %}
+                disabled
+              {% endunless %}
+            >
+              <span data-add-label>
+                {%- if selected_variant.available -%}
+                  {{- 'eva.product.add_to_bag' | t -}}
+                {%- else -%}
+                  {{- 'eva.product.sold_out' | t -}}
+                {%- endif -%}
+              </span>
+            </button>
+
+            {%- if section.settings.show_dynamic_checkout -%}
+              {{ form | payment_button }}
+            {%- endif -%}
+
+            <p
+              class="eva-product__error"
+              role="alert"
+              data-error
+              hidden
+            ></p>
+            <p
+              class="visually-hidden"
+              role="status"
+              data-status
+            ></p>
+          {%- endform -%}
+        </eva-product-form>
+
+        {%- if section.settings.info_text != blank -%}
+          <p class="eva-caption eva-product__note">{{ section.settings.info_text | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.show_description and product.description != blank -%}
+          <div class="eva-body eva-rte eva-product__description">{{ product.description }}</div>
+        {%- endif -%}
+
+        <div class="eva-product__details">
+          {% content_for 'blocks' %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- if size_guide != blank -%}
+  <dialog-component id="{{ size_guide_id }}">
+    <dialog
+      ref="dialog"
+      class="eva-drawer eva-drawer--end eva-scheme-ivory eva-size-guide"
+      aria-labelledby="{{ size_guide_id }}-Title"
+      scroll-lock
+    >
+      <div class="eva-drawer__head">
+        <h2
+          id="{{ size_guide_id }}-Title"
+          class="eva-eyebrow"
+        >
+          {{- size_guide.title | escape -}}
+        </h2>
+        <button
+          type="button"
+          class="eva-icon-button"
+          on:click="dialog-component/closeDialog"
+          aria-label="{{ 'eva.product.close_size_guide' | t }}"
+        >
+          {%- render 'eva-icon', icon: 'close' -%}
+        </button>
+      </div>
+      <div class="eva-body eva-rte eva-size-guide__content">{{ size_guide.content }}</div>
+    </dialog>
+  </dialog-component>
+{%- endif -%}
+
+{%- comment -%} Product (or ProductGroup with variants) markup maintained by Shopify, plus the breadcrumb trail. {%- endcomment -%}
+{{ product | structured_data }}
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": {{ 'eva.breadcrumbs.home' | t | json }},
+        "item": {{ shop.url | json }}
+      },
+      {%- if breadcrumb_collection != blank %}
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": {{ breadcrumb_collection.title | json }},
+          "item": {{ shop.url | append: breadcrumb_collection.url | json }}
+        },
+      {%- endif %}
+      {
+        "@type": "ListItem",
+        "position": {% if breadcrumb_collection != blank %}3{% else %}2{% endif %},
+        "name": {{ product.title | json }},
+        "item": {{ shop.url | append: product.url | json }}
+      }
+    ]
+  }
+</script>
+
+{% stylesheet %}
+  .eva-product__grid {
+    display: grid;
+    gap: 2rem;
+  }
+
+  /* Gallery */
+
+  .eva-gallery {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .eva-gallery__thumbs {
+    display: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-gallery__thumb {
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--eva-media-ratio, 3 / 4);
+    padding: 0;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+
+  .eva-gallery__thumb[aria-current] {
+    border-color: var(--eva-charcoal);
+  }
+
+  .eva-gallery__thumb:focus-visible {
+    outline: 2px solid var(--eva-charcoal);
+    outline-offset: 2px;
+  }
+
+  .eva-gallery__viewport {
+    position: relative;
+    min-width: 0;
+  }
+
+  .eva-gallery__track {
+    position: relative;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .eva-gallery__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .eva-gallery__track:focus-visible {
+    outline: 2px solid var(--eva-charcoal);
+    outline-offset: 2px;
+  }
+
+  .eva-gallery__slide {
+    flex: 0 0 100%;
+    aspect-ratio: var(--eva-media-ratio, 3 / 4);
+    scroll-snap-align: start;
+  }
+
+  .eva-gallery__slide > :is(video, iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 0;
+  }
+
+  .eva-gallery__counter {
+    position: absolute;
+    inset-block-end: 0.75rem;
+    inset-inline-end: 0.75rem;
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--eva-ivory);
+    color: var(--eva-charcoal);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* Info column */
+
+  .eva-product__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .eva-product__title {
+    font-size: clamp(2rem, 1.4rem + 1.5vw, 2.5rem);
+  }
+
+  .eva-product__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.75rem;
+    margin-block-start: 0.25rem;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 1.125rem;
+  }
+
+  .eva-product__compare {
+    font-size: 0.9375rem;
+    color: var(--eva-muted);
+  }
+
+  .eva-product__tax a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: currentcolor;
+  }
+
+  .eva-product__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-block-start: 1.25rem;
+  }
+
+  .eva-option {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .eva-option__legend {
+    padding: 0;
+    margin-block-end: 0.75rem;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.6875rem;
+    letter-spacing: var(--eva-tracking-label);
+    text-transform: uppercase;
+  }
+
+  .eva-option__selected {
+    margin-inline-start: 0.25rem;
+    font-family: var(--font-body--family);
+    font-weight: var(--font-body--weight);
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.8125rem;
+  }
+
+  .eva-option__guide {
+    position: absolute;
+    inset-block-start: -0.25rem;
+    inset-inline-end: 0;
+    padding: 0.25rem 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    font-size: 0.75rem;
+  }
+
+  .eva-option__values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .eva-option__value {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.875rem;
+    min-height: 2.875rem;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--eva-border);
+    background-color: #fff;
+    color: var(--eva-charcoal);
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+
+  .eva-option__value:hover {
+    border-color: var(--eva-charcoal);
+  }
+
+  .eva-option__value:has(:checked) {
+    background-color: var(--eva-charcoal);
+    border-color: var(--eva-charcoal);
+    color: var(--eva-ivory);
+  }
+
+  .eva-option__value:has(:focus-visible) {
+    outline: 2px solid var(--eva-charcoal);
+    outline-offset: 2px;
+  }
+
+  .eva-option__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  /* Unavailable combinations stay selectable (they show "Sold out") but are struck through. */
+  .eva-option__value.is-unavailable {
+    color: var(--eva-grey);
+    background-image: linear-gradient(
+      to top right,
+      transparent calc(50% - 0.5px),
+      var(--eva-border) calc(50% - 0.5px),
+      var(--eva-border) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    );
+  }
+
+  .eva-option__value.is-unavailable:has(:checked) {
+    color: var(--eva-ivory);
+  }
+
+  .eva-option__value--swatch {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0.3125rem;
+    border-radius: 50%;
+    background-color: transparent;
+  }
+
+  .eva-option__value--swatch:has(:checked) {
+    background-color: transparent;
+    border-color: var(--eva-charcoal);
+  }
+
+  .eva-option__swatch {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1px solid var(--eva-line);
+    background-size: cover;
+    background-position: center;
+  }
+
+  .eva-option__value--swatch.is-unavailable .eva-option__swatch {
+    opacity: 0.45;
+  }
+
+  .eva-product__add {
+    width: 100%;
+    min-height: 3.125rem;
+  }
+
+  /* Until the script has synced the chosen options into the form, a tap would add the wrong variant. */
+  eva-product-form:not(:defined) .eva-product__add {
+    pointer-events: none;
+  }
+
+  .eva-product__options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .eva-product__select {
+    width: 100%;
+    min-height: 2.875rem;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--eva-border);
+    border-radius: 0;
+    background-color: #fff;
+    color: var(--eva-charcoal);
+    font-size: 0.875rem;
+  }
+
+  .eva-product__add:disabled {
+    background-color: var(--eva-grey);
+    border-color: var(--eva-grey);
+    cursor: not-allowed;
+  }
+
+  .eva-product__add[aria-busy='true'] {
+    opacity: 0.7;
+    cursor: progress;
+  }
+
+  .eva-product__error {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--eva-wine);
+  }
+
+  .eva-product__note {
+    margin-block-start: 0.25rem;
+    text-align: center;
+  }
+
+  .eva-product__description {
+    margin-block-start: 1.25rem;
+  }
+
+  .eva-product__details {
+    margin-block-start: 0.75rem;
+    border-block-start: 1px solid var(--eva-line);
+  }
+
+  .eva-size-guide__content table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+
+  .eva-size-guide__content :is(th, td) {
+    padding: 0.5rem;
+    border-block-end: 1px solid var(--eva-line);
+    text-align: start;
+  }
+
+  .eva-size-guide__content {
+    padding-block: 1.5rem;
+  }
+
+  @media screen and (min-width: 990px) {
+    .eva-product__grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      gap: clamp(2.5rem, 4.5vw, 4rem);
+      align-items: start;
+    }
+
+    .eva-gallery--has-thumbs {
+      grid-template-columns: 4.5rem minmax(0, 1fr);
+      gap: 1rem;
+    }
+
+    .eva-gallery__thumbs {
+      display: grid;
+      align-content: start;
+      gap: 0.625rem;
+    }
+
+    .eva-gallery__counter {
+      display: none;
+    }
+
+    .eva-product__info {
+      position: sticky;
+      inset-block-start: calc(var(--header-height, 0px) + 1.5rem);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.main_product",
+  "class": "eva-main-product-section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "blocks": [
+    {
+      "type": "_eva-product-accordion"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "settings": [
+    {
+      "type": "select",
+      "id": "eyebrow_source",
+      "label": "t:eva.settings.eyebrow",
+      "options": [
+        { "value": "collection", "label": "t:eva.options.collection" },
+        { "value": "type", "label": "t:eva.options.product_type" },
+        { "value": "vendor", "label": "t:eva.options.vendor" },
+        { "value": "none", "label": "t:eva.options.none" }
+      ],
+      "default": "collection"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "t:eva.settings.show_breadcrumbs",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tax_note",
+      "label": "t:eva.settings.show_tax_note",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "media_ratio",
+      "label": "t:eva.settings.image_ratio",
+      "options": [
+        { "value": "3 / 4", "label": "3:4" },
+        { "value": "4 / 5", "label": "4:5" },
+        { "value": "2 / 3", "label": "2:3" }
+      ],
+      "default": "3 / 4"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.size_guide"
+    },
+    {
+      "type": "text",
+      "id": "size_option_name",
+      "label": "t:eva.settings.size_option_name",
+      "info": "t:eva.info.size_option_name",
+      "default": "Size"
+    },
+    {
+      "type": "page",
+      "id": "size_guide_page",
+      "label": "t:eva.settings.size_guide_page",
+      "info": "t:eva.info.size_guide_page"
+    },
+    {
+      "type": "text",
+      "id": "size_guide_label",
+      "label": "t:eva.settings.size_guide_label",
+      "default": "Size guide"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.content"
+    },
+    {
+      "type": "text",
+      "id": "info_text",
+      "label": "t:eva.settings.info_text",
+      "default": "Ships in 7 to 14 working days · Free returns within 14 days"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "t:eva.settings.show_description_product",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dynamic_checkout",
+      "label": "t:eva.settings.show_dynamic_checkout",
+      "info": "t:eva.info.show_dynamic_checkout",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

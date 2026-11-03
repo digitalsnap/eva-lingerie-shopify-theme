@@ -1,0 +1,144 @@
+{%- doc -%}
+  One product detail row (Fit & fabric, Shipping & returns, Care) as a native <details> element.
+  Shows the product's metafield when it has one, otherwise the shared content below, and hides
+  itself when both are empty. Used by sections/eva-main-product.liquid.
+{%- enddoc -%}
+
+{%- liquid
+  assign content = block.settings.content
+  if block.settings.metafield != blank and closest.product != blank
+    assign metafield_parts = block.settings.metafield | strip | split: '.'
+    assign product_field = closest.product.metafields[metafield_parts[0]][metafield_parts[1]]
+    if product_field != blank
+      assign content = product_field | metafield_tag
+    endif
+  endif
+-%}
+
+{%- if content != blank -%}
+  <details
+    class="eva-accordion"
+    {% if block.settings.open %}
+      open
+    {% endif %}
+    {{ block.shopify_attributes }}
+  >
+    <summary class="eva-accordion__summary">
+      {{- block.settings.heading | escape -}}
+      <span
+        class="eva-accordion__icon"
+        aria-hidden="true"
+      ></span>
+    </summary>
+    <div class="eva-accordion__content eva-body eva-rte">{{ content }}</div>
+  </details>
+{%- elsif request.design_mode -%}
+  <p
+    class="eva-caption eva-accordion__hint"
+    {{ block.shopify_attributes }}
+  >
+    {{ 'eva.product.accordion_empty' | t: heading: block.settings.heading }}
+  </p>
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-accordion {
+    border-block-end: 1px solid var(--eva-line);
+  }
+
+  .eva-accordion__summary {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.25rem;
+    padding-inline-end: 1.5rem;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.75rem;
+    letter-spacing: var(--eva-tracking-nav);
+    text-transform: uppercase;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .eva-accordion__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .eva-accordion__summary:focus-visible {
+    outline: 2px solid currentcolor;
+    outline-offset: 2px;
+  }
+
+  /* A plus that loses its vertical bar when open, matching the wireframe's + and − */
+  .eva-accordion__icon {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: 0.125rem;
+    width: 0.75rem;
+    height: 1px;
+    background-color: currentcolor;
+  }
+
+  .eva-accordion__icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: currentcolor;
+    transform: rotate(90deg);
+    transition: transform var(--eva-duration) var(--eva-ease);
+  }
+
+  .eva-accordion[open] .eva-accordion__icon::after {
+    transform: rotate(0deg);
+  }
+
+  .eva-accordion__content {
+    padding-block-end: 1.25rem;
+    color: var(--eva-muted, currentcolor);
+  }
+
+  .eva-accordion__hint {
+    padding-block: 0.75rem;
+    border-block-end: 1px dashed var(--eva-line);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.blocks.product_accordion",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:eva.settings.heading",
+      "default": "Fit & fabric"
+    },
+    {
+      "type": "text",
+      "id": "metafield",
+      "label": "t:eva.settings.metafield",
+      "info": "t:eva.info.accordion_metafield"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "t:eva.settings.content",
+      "info": "t:eva.info.accordion_content"
+    },
+    {
+      "type": "checkbox",
+      "id": "open",
+      "label": "t:eva.settings.open_by_default",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.blocks.product_accordion"
+    }
+  ]
+}
+{% endschema %}

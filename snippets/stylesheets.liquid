@@ -1,5 +1,8 @@
-{%- comment -%} overflow-list.css is only used by Horizon menus and swatches, which the Eva home page does not render. {%- endcomment -%}
-{%- unless template.name == 'index' and request.design_mode == false -%}
+{%- comment -%}
+  overflow-list.css is only used by Horizon menus and swatches, which no storefront template
+  renders any more; the theme editor still gets it for Horizon sections added there.
+{%- endcomment -%}
+{%- if request.design_mode -%}
   {{ 'overflow-list.css' | asset_url | preload_tag: as: 'style' }}
-{%- endunless -%}
+{%- endif -%}
 {{ 'base.css' | asset_url | stylesheet_tag: preload: true }}

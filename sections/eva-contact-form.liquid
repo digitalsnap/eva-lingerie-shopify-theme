@@ -1,0 +1,200 @@
+{%- liquid
+  assign form_id = 'EvaContact-' | append: section.id
+  assign field_id = 'EvaContactField-' | append: section.id
+  assign status_id = 'EvaContactStatus-' | append: section.id
+-%}
+
+<div
+  class="eva-contact eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="eva-page eva-contact__inner">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="eva-heading eva-heading--xs">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    {%- if section.settings.text != blank -%}
+      <div class="eva-body eva-rte eva-contact__text">{{ section.settings.text }}</div>
+    {%- endif -%}
+
+    {%- form 'contact', id: form_id, class: 'eva-contact__form' -%}
+      {%- if form.posted_successfully? -%}
+        <p
+          id="{{ status_id }}"
+          class="eva-form__status"
+          role="status"
+        >
+          {{- 'eva.contact.success' | t -}}
+        </p>
+      {%- elsif form.errors -%}
+        <div
+          id="{{ status_id }}"
+          class="eva-form__status eva-form__status--error"
+          role="alert"
+        >
+          <p>{{ 'eva.contact.error' | t }}</p>
+          {{ form.errors | default_errors }}
+        </div>
+      {%- endif -%}
+
+      <div class="eva-form__row">
+        <div class="eva-form__field">
+          <label for="{{ field_id }}-Name">{{ 'eva.contact.name' | t }}</label>
+          <input
+            id="{{ field_id }}-Name"
+            class="eva-form__input"
+            type="text"
+            name="contact[name]"
+            autocomplete="name"
+            value="{{ form.name | default: customer.name | escape }}"
+          >
+        </div>
+        <div class="eva-form__field">
+          <label for="{{ field_id }}-Email">
+            {{- 'eva.contact.email' | t }} <span aria-hidden="true">*</span>
+          </label>
+          <input
+            id="{{ field_id }}-Email"
+            class="eva-form__input"
+            type="email"
+            name="contact[email]"
+            autocomplete="email"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+            value="{{ form.email | default: customer.email | escape }}"
+            {% if form.errors contains 'email' %}
+              aria-invalid="true"
+              aria-describedby="{{ status_id }}"
+            {% endif %}
+          >
+        </div>
+      </div>
+
+      {%- if section.settings.show_phone -%}
+        <div class="eva-form__field">
+          <label for="{{ field_id }}-Phone">{{ 'eva.contact.phone' | t }}</label>
+          <input
+            id="{{ field_id }}-Phone"
+            class="eva-form__input"
+            type="tel"
+            name="contact[phone]"
+            autocomplete="tel"
+            value="{{ form.phone | escape }}"
+          >
+        </div>
+      {%- endif -%}
+
+      <div class="eva-form__field">
+        <label for="{{ field_id }}-Message">
+          {{- 'eva.contact.message' | t }} <span aria-hidden="true">*</span>
+        </label>
+        <textarea
+          id="{{ field_id }}-Message"
+          class="eva-form__input"
+          name="contact[body]"
+          rows="6"
+          required
+          {% if form.errors contains 'body' %}
+            aria-invalid="true"
+            aria-describedby="{{ status_id }}"
+          {% endif %}
+        >
+          {{- form.body -}}
+        </textarea>
+      </div>
+
+      <p class="eva-caption">{{ 'eva.contact.required' | t }}</p>
+
+      <button
+        type="submit"
+        class="eva-button eva-button--primary eva-form__submit"
+      >
+        {{- 'eva.contact.send' | t -}}
+      </button>
+    {%- endform -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .eva-contact__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-inline-size: 44rem;
+  }
+
+  .eva-contact__form {
+    display: grid;
+    gap: 1.25rem;
+    margin-block-start: 0.5rem;
+  }
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.contact_form",
+  "class": "eva-contact-section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:eva.settings.heading",
+      "default": "Write to us"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:eva.settings.text"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_phone",
+      "label": "t:eva.settings.show_phone",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.contact_form"
+    }
+  ]
+}
+{% endschema %}

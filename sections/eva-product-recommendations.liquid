@@ -1,0 +1,172 @@
+{%- liquid
+  assign limit = section.settings.products_to_show
+  assign columns = limit | at_most: 4
+  assign card_vw = 100 | divided_by: columns
+  assign sizes = '(min-width: 990px) ' | append: card_vw | append: 'vw, 50vw'
+
+  # Hand-picked set from a product list metafield first; Shopify's recommendations otherwise.
+  # When this section is rendered by the recommendations endpoint there is no product, only
+  # `recommendations`.
+  assign set_products = nil
+  if product != blank and section.settings.metafield != blank
+    assign metafield_parts = section.settings.metafield | strip | split: '.'
+    assign set_field = product.metafields[metafield_parts[0]][metafield_parts[1]]
+    if set_field.value != blank
+      assign set_products = set_field.value
+    endif
+  endif
+  if set_products == nil and recommendations.performed? and recommendations.products_count > 0
+    assign set_products = recommendations.products
+  endif
+-%}
+
+{%- if set_products == nil and product != blank -%}
+  <script
+    src="{{ 'eva-product.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{%- endif -%}
+
+<eva-recommendations
+  class="eva-recommendations"
+  data-section="{{ section.id }}"
+  {% if set_products == nil %}
+    {% if product != blank %}
+      data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ limit }}&intent={{ section.settings.intent }}"
+    {% endif %}
+    hidden
+  {% endif %}
+>
+  {%- if set_products != nil -%}
+    <div
+      class="eva-section eva-scheme-{{ section.settings.color_scheme }}"
+      style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-columns: {{ columns }};"
+    >
+      <div class="eva-page">
+        <h2 class="eva-heading eva-heading--xs eva-recommendations__heading">{{ section.settings.heading | escape }}</h2>
+        <ul
+          class="eva-recommendations__grid"
+          role="list"
+        >
+          {%- for set_product in set_products limit: limit -%}
+            <li>
+              {%- render 'eva-product-card', product: set_product, sizes: sizes, colour_display: 'names' -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    </div>
+  {%- endif -%}
+</eva-recommendations>
+
+{% stylesheet %}
+  .eva-recommendations {
+    display: block;
+  }
+
+  .eva-recommendations__heading {
+    margin-block-end: clamp(1.75rem, 4vw, 2.5rem);
+    text-align: center;
+  }
+
+  .eva-recommendations__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 990px) {
+    .eva-recommendations__grid {
+      grid-template-columns: repeat(var(--eva-columns, 4), minmax(0, 1fr));
+      gap: 2.5rem 1.25rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.product_recommendations",
+  "class": "eva-recommendations-section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:eva.settings.heading",
+      "default": "Complete the set"
+    },
+    {
+      "type": "text",
+      "id": "metafield",
+      "label": "t:eva.settings.metafield",
+      "info": "t:eva.info.recommendations_metafield",
+      "default": "custom.complete_the_set"
+    },
+    {
+      "type": "select",
+      "id": "intent",
+      "label": "t:eva.settings.recommendation_intent",
+      "info": "t:eva.info.recommendation_intent",
+      "options": [
+        { "value": "complementary", "label": "t:eva.options.complementary" },
+        { "value": "related", "label": "t:eva.options.related" }
+      ],
+      "default": "complementary"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "t:eva.settings.products_to_show",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.product_recommendations"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,221 @@
+{%- liquid
+  assign columns = section.settings.columns | plus: 0
+  assign card_vw = 100 | divided_by: columns
+  assign sizes = '(min-width: 990px) ' | append: card_vw | append: 'vw, (min-width: 750px) 50vw, 100vw'
+-%}
+
+<div
+  class="eva-blog eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-columns: {{ columns }};"
+>
+  <div class="eva-page">
+    <div class="eva-blog__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eva-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="eva-heading eva-heading--md">{{ blog.title | escape }}</h1>
+
+      {%- if section.settings.show_tags and blog.all_tags.size > 0 -%}
+        <nav
+          class="eva-blog__tags"
+          aria-label="{{ 'eva.blog.topics' | t }}"
+        >
+          <ul role="list">
+            <li>
+              <a
+                href="{{ blog.url }}"
+                class="eva-chip"
+                {% if current_tags == blank %}
+                  aria-current="page"
+                {% endif %}
+              >
+                {{- 'eva.collection.all' | t -}}
+              </a>
+            </li>
+            {%- for tag in blog.all_tags -%}
+              {%- liquid
+                # Tag URLs are handles; compare handles so multi-word tags match too.
+                assign tag_handle = tag | handleize
+                assign tag_is_current = false
+                for current_tag in current_tags
+                  assign current_handle = current_tag | handleize
+                  if current_handle == tag_handle
+                    assign tag_is_current = true
+                  endif
+                endfor
+              -%}
+              <li>
+                <a
+                  href="{{ blog.url }}/tagged/{{ tag_handle }}"
+                  class="eva-chip"
+                  {% if tag_is_current %}
+                    aria-current="page"
+                  {% endif %}
+                >
+                  {{- tag | escape -}}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+    </div>
+
+    {%- paginate blog.articles by section.settings.articles_per_page -%}
+      {%- if blog.articles.size > 0 -%}
+        <ul
+          class="eva-blog__grid"
+          role="list"
+        >
+          {%- for article in blog.articles -%}
+            {%- liquid
+              assign card_loading = 'lazy'
+              if forloop.index <= columns
+                assign card_loading = 'eager'
+              endif
+            -%}
+            <li>
+              {%- render 'eva-article-card', article: article, sizes: sizes, loading: card_loading -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <p class="eva-body eva-blog__empty">{{ 'eva.blog.empty' | t }}</p>
+      {%- endif -%}
+
+      <div class="eva-blog__pagination">
+        {%- render 'eva-pagination', paginate: paginate -%}
+      </div>
+    {%- endpaginate -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .eva-blog__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-block-end: clamp(2rem, 5vw, 3.5rem);
+    text-align: center;
+  }
+
+  .eva-blog__tags {
+    max-inline-size: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .eva-blog__tags ul {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-blog__grid {
+    display: grid;
+    gap: 3rem 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-blog__empty {
+    text-align: center;
+  }
+
+  .eva-blog__pagination {
+    margin-block-start: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  @media screen and (min-width: 750px) {
+    .eva-blog__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .eva-blog__grid {
+      grid-template-columns: repeat(var(--eva-columns, 3), minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.main_blog",
+  "class": "eva-main-blog-section",
+  "enabled_on": {
+    "templates": ["blog"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:eva.settings.eyebrow",
+      "default": "The journal"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "t:eva.settings.show_tags",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "label": "t:eva.settings.articles_per_page",
+      "min": 3,
+      "max": 24,
+      "step": 3,
+      "default": 9
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "t:eva.settings.columns_desktop",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    }
+  ]
+}
+{% endschema %}

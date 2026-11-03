@@ -1,0 +1,489 @@
+{%- liquid
+  assign columns = section.settings.columns | plus: 0
+  assign card_vw = 100 | divided_by: columns
+  assign sizes = '(min-width: 990px) ' | append: card_vw | append: 'vw, 50vw'
+  assign drawer_id = 'EvaFilters-' | append: section.id
+
+  # Category pills come from the menu (the top-level link that is, or is the parent of, this
+  # collection) or from one storefront filter, e.g. a "Style" metafield filter. `current` matches the
+  # exact path (query strings ignored); `active` would also match a parent path such as /collections.
+  assign pill_parent = nil
+  if section.settings.pills_source == 'menu'
+    for link in section.settings.pills_menu.links
+      if link.links.size > 0
+        if link.current or link.child_current
+          assign pill_parent = link
+          break
+        endif
+      endif
+    endfor
+  endif
+
+  # The filter can be named by label or by URL parameter; the parameter survives translation.
+  assign pill_filter = nil
+  if section.settings.pills_source == 'filter' and section.settings.pills_filter_label != blank
+    assign pill_filter_key = section.settings.pills_filter_label | strip
+    for filter in collection.filters
+      if filter.type == 'list'
+        if filter.label == pill_filter_key or filter.param_name == pill_filter_key
+          assign pill_filter = filter
+          break
+        endif
+      endif
+    endfor
+  endif
+
+  # The pill filter is shown above the grid, so the drawer leaves it out.
+  assign skip_param = nil
+  if pill_filter != nil
+    assign skip_param = pill_filter.param_name
+  endif
+
+  # The first row is often the Largest Contentful Paint (no banner image, or on tall screens), so it
+  # never lazy-loads.
+  assign eager_cards = columns
+-%}
+
+{%- capture filter_query -%}{%- render 'eva-filter-query', results: collection -%}{%- endcapture -%}
+{%- liquid
+  assign filter_query = filter_query | strip
+  assign clear_url = collection.url
+  if collection.sort_by != blank
+    assign clear_url = collection.url | append: '?sort_by=' | append: collection.sort_by
+  endif
+-%}
+
+<div
+  class="eva-collection eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px; --eva-columns: {{ columns }}; --eva-card-ratio: {{ section.settings.image_ratio }};"
+>
+  <div class="eva-page">
+    <div class="eva-collection__toolbar">
+      {%- if pill_parent != nil -%}
+        <nav
+          class="eva-collection__pills"
+          aria-label="{{ 'eva.collection.categories' | t }}"
+        >
+          <ul role="list">
+            <li>
+              <a
+                href="{{ pill_parent.url }}"
+                class="eva-chip"
+                {% if pill_parent.current %}
+                  aria-current="page"
+                {% endif %}
+              >
+                {{- 'eva.collection.all' | t -}}
+              </a>
+            </li>
+            {%- for child_link in pill_parent.links -%}
+              <li>
+                <a
+                  href="{{ child_link.url }}"
+                  class="eva-chip"
+                  {% if child_link.current %}
+                    aria-current="page"
+                  {% endif %}
+                >
+                  {{- child_link.title | escape -}}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- elsif pill_filter != nil -%}
+        {%- liquid
+          assign pill_base_url = pill_filter.url_to_remove
+          assign pill_joiner = '?'
+          if pill_base_url contains '?'
+            assign pill_joiner = '&'
+          endif
+        -%}
+        <nav
+          class="eva-collection__pills"
+          aria-label="{{ pill_filter.label | escape }}"
+        >
+          <ul role="list">
+            <li>
+              <a
+                href="{{ pill_base_url }}"
+                class="eva-chip"
+                rel="nofollow"
+                {% if pill_filter.active_values.size == 0 %}
+                  aria-current="page"
+                {% endif %}
+              >
+                {{- 'eva.collection.all' | t -}}
+              </a>
+            </li>
+            {%- for value in pill_filter.values -%}
+              {%- if value.count > 0 or value.active -%}
+                {%- capture pill_url -%}
+                  {{- pill_base_url }}{{ pill_joiner }}{{ value.param_name }}={{ value.value | url_encode -}}
+                {%- endcapture -%}
+                <li>
+                  <a
+                    href="{{ pill_url | escape }}"
+                    class="eva-chip"
+                    rel="nofollow"
+                    {% if value.active %}
+                      aria-current="page"
+                    {% endif %}
+                  >
+                    {{- value.label | escape -}}
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      {%- render 'eva-facet-actions',
+        results: collection,
+        base_url: collection.url,
+        drawer_id: drawer_id,
+        skip_param: skip_param,
+        show_filter: section.settings.enable_filtering,
+        show_sort: section.settings.enable_sorting
+      -%}
+    </div>
+
+    <p class="eva-collection__count eva-caption">
+      {{- 'eva.collection.product_count' | t: count: collection.products_count -}}
+    </p>
+
+    {%- render 'eva-active-filters', results: collection, base_url: collection.url -%}
+
+    <h2 class="visually-hidden">{{ 'eva.collection.products_heading' | t: title: collection.title }}</h2>
+
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      {%- if collection.products.size > 0 -%}
+        <ul
+          class="eva-collection__grid"
+          role="list"
+        >
+          {%- for product in collection.products -%}
+            {%- liquid
+              assign card_loading = 'lazy'
+              if forloop.index <= eager_cards
+                assign card_loading = 'eager'
+              endif
+            -%}
+            <li>
+              {%- render 'eva-product-card',
+                product: product,
+                sizes: sizes,
+                loading: card_loading,
+                show_secondary_image: section.settings.show_secondary_image,
+                colour_display: section.settings.colour_display
+              -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <div class="eva-collection__empty">
+          <p class="eva-heading eva-heading--xs">{{ 'eva.collection.empty_title' | t }}</p>
+          {%- if filter_query != blank -%}
+            <a
+              href="{{ clear_url }}"
+              class="eva-link"
+            >
+              {{- 'eva.collection.clear_all' | t -}}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <div class="eva-collection__pagination">
+        {%- render 'eva-pagination', paginate: paginate -%}
+      </div>
+
+      {%- comment -%}
+        Structured data for search engines and AI answers: the breadcrumb trail and the products on
+        this page as an ItemList. Skipped on filtered or sorted views, which canonicalise to this URL.
+      {%- endcomment -%}
+      {%- if filter_query == blank and collection.sort_by == blank and collection.products.size > 0 -%}
+        {%- liquid
+          assign collection_url = shop.url | append: collection.url
+          assign page_url = collection_url
+          if paginate.current_page > 1
+            assign page_url = collection_url | append: '?page=' | append: paginate.current_page
+          endif
+        -%}
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": {{ 'eva.breadcrumbs.home' | t | json }},
+                    "item": {{ shop.url | json }}
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": {{ collection.title | json }},
+                    "item": {{ collection_url | json }}
+                  }
+                ]
+              },
+              {
+                "@type": "CollectionPage",
+                "@id": {{ page_url | append: '#webpage' | json }},
+                "url": {{ page_url | json }},
+                "name": {{ collection.title | json }},
+                {%- if collection.description != blank %}
+                  "description": {{ collection.description | strip_html | strip | truncate: 300 | json }},
+                {%- endif %}
+                "isPartOf": { "@id": {{ shop.url | append: '/#website' | json }} },
+                "mainEntity": {
+                  "@type": "ItemList",
+                  "numberOfItems": {{ collection.products_count }},
+                  "itemListElement": [
+                    {%- for product in collection.products -%}
+                      {
+                        "@type": "ListItem",
+                        "position": {{ paginate.current_offset | plus: forloop.index }},
+                        "url": {{ shop.url | append: product.url | json }},
+                        "name": {{ product.title | json }}
+                      }
+                      {%- unless forloop.last %},{% endunless -%}
+                    {%- endfor -%}
+                  ]
+                }
+              }
+            ]
+          }
+        </script>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</div>
+
+{%- if section.settings.enable_filtering -%}
+  {%- render 'eva-filter-drawer',
+    results: collection,
+    base_url: collection.url,
+    drawer_id: drawer_id,
+    skip_param: skip_param
+  -%}
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-collection__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .eva-collection__pills {
+    flex: 1 1 100%;
+    min-width: 0;
+    margin-inline: calc(var(--eva-gutter) * -1);
+    padding-inline: var(--eva-gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .eva-collection__pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .eva-collection__pills ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    gap: 0.5rem;
+  }
+
+  .eva-collection__count {
+    margin-block: 1.25rem 1rem;
+  }
+
+  .eva-collection__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-collection__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 4rem;
+    text-align: center;
+  }
+
+  .eva-collection__pagination {
+    margin-block-start: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  @media screen and (min-width: 750px) {
+    .eva-collection__pills {
+      flex: 1 1 auto;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .eva-collection__grid {
+      grid-template-columns: repeat(var(--eva-columns, 4), minmax(0, 1fr));
+      gap: 2.5rem 1.25rem;
+    }
+  }
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.main_collection",
+  "class": "eva-main-collection-section",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "t:eva.settings.products_per_page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "t:eva.settings.columns_desktop",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "t:eva.settings.image_ratio",
+      "options": [
+        { "value": "3 / 4", "label": "3:4" },
+        { "value": "4 / 5", "label": "4:5" },
+        { "value": "2 / 3", "label": "2:3" }
+      ],
+      "default": "3 / 4"
+    },
+    {
+      "type": "select",
+      "id": "colour_display",
+      "label": "t:eva.settings.colour_display",
+      "options": [
+        { "value": "swatches", "label": "t:eva.options.swatches" },
+        { "value": "names", "label": "t:eva.options.colour_names" }
+      ],
+      "default": "swatches"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "label": "t:eva.settings.show_secondary_image",
+      "info": "t:eva.info.show_secondary_image",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.category_pills"
+    },
+    {
+      "type": "select",
+      "id": "pills_source",
+      "label": "t:eva.settings.pills_source",
+      "info": "t:eva.info.pills_source",
+      "options": [
+        { "value": "menu", "label": "t:eva.options.pills_menu" },
+        { "value": "filter", "label": "t:eva.options.pills_filter" },
+        { "value": "none", "label": "t:eva.options.none" }
+      ],
+      "default": "menu"
+    },
+    {
+      "type": "link_list",
+      "id": "pills_menu",
+      "label": "t:eva.settings.menu",
+      "default": "main-menu",
+      "visible_if": "{{ section.settings.pills_source == 'menu' }}"
+    },
+    {
+      "type": "text",
+      "id": "pills_filter_label",
+      "label": "t:eva.settings.pills_filter_label",
+      "info": "t:eva.info.pills_filter_label",
+      "default": "Style",
+      "visible_if": "{{ section.settings.pills_source == 'filter' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.filtering"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "t:eva.settings.enable_filtering",
+      "info": "t:eva.info.enable_filtering",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "t:eva.settings.enable_sorting",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:eva.settings.color_scheme",
+      "options": [
+        { "value": "ivory", "label": "t:eva.options.ivory" },
+        { "value": "blush", "label": "t:eva.options.blush" }
+      ],
+      "default": "ivory"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:eva.settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:eva.settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

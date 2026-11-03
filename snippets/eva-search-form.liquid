@@ -1,0 +1,81 @@
+{%- doc -%}
+  A plain search form (works without JavaScript) for the search results and 404 pages.
+
+  @param {string} id_prefix - Unique prefix for the input id.
+  @param {string} [terms] - The current search terms, to prefill the field.
+
+  @example
+  {% render 'eva-search-form', id_prefix: 'EvaSearch', terms: search.terms %}
+{%- enddoc -%}
+
+<form
+  action="{{ routes.search_url }}"
+  method="get"
+  role="search"
+  class="eva-search-form"
+>
+  <label
+    for="{{ id_prefix }}-Input"
+    class="visually-hidden"
+  >
+    {{- 'eva.search.label' | t -}}
+  </label>
+  <input
+    id="{{ id_prefix }}-Input"
+    class="eva-search-form__input"
+    type="search"
+    name="q"
+    value="{{ terms | escape }}"
+    placeholder="{{ 'eva.search.placeholder' | t | escape }}"
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+  >
+  <input
+    type="hidden"
+    name="options[prefix]"
+    value="last"
+  >
+  <button
+    type="submit"
+    class="eva-button eva-button--outline eva-search-form__button"
+  >
+    {{- 'eva.search.submit' | t -}}
+  </button>
+</form>
+
+{% stylesheet %}
+  .eva-search-form {
+    display: flex;
+    width: min(100%, 34rem);
+  }
+
+  .eva-search-form__input {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.875rem;
+    padding-inline: 1rem;
+    border: 1px solid var(--eva-border);
+    border-inline-end: 0;
+    border-radius: 0;
+    background-color: #fff;
+    color: var(--eva-charcoal);
+    font-family: var(--font-body--family);
+    font-weight: var(--font-body--weight);
+    font-size: 0.9375rem;
+  }
+
+  .eva-search-form__input::placeholder {
+    color: var(--eva-grey);
+    opacity: 1;
+  }
+
+  .eva-search-form__input:focus-visible {
+    outline: 2px solid var(--eva-charcoal);
+    outline-offset: -2px;
+  }
+
+  .eva-search-form__button {
+    flex: none;
+  }
+{% endstylesheet %}

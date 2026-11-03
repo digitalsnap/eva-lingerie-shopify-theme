@@ -417,6 +417,133 @@
       "social": "Social media",
       "opens_new_window": "opens in a new window",
       "choose_menu": "Choose a menu for this column in the theme editor."
+    },
+    "collection": {
+      "categories": "Categories",
+      "all": "All",
+      "filter": "Filter",
+      "close_filters": "Close filters",
+      "sort_by": "Sort: {{ option }}",
+      "product_count": {
+        "one": "{{ count }} product",
+        "other": "{{ count }} products"
+      },
+      "active_filters": "Active filters",
+      "remove_filter": "Remove filter",
+      "clear_all": "Clear all",
+      "products_heading": "{{ title }} products",
+      "empty_title": "No products found",
+      "price_from": "From",
+      "price_to": "To",
+      "show_results": "Show results"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{ number }}"
+    },
+    "breadcrumbs": {
+      "home": "Home"
+    },
+    "product": {
+      "breadcrumb": "Breadcrumb",
+      "gallery": "{{ title }} images",
+      "show_media": "Show image {{ number }}",
+      "tax_included": "Tax included.",
+      "tax_excluded": "Tax excluded.",
+      "shipping_at_checkout": "Shipping calculated at checkout.",
+      "shipping_at_checkout_html": "<a href=\"{{ link }}\">Shipping</a> calculated at checkout.",
+      "add_to_bag": "Add to bag",
+      "sold_out": "Sold out",
+      "unavailable": "Unavailable",
+      "added": "Added to your bag",
+      "add_error": "Something went wrong. Please try again.",
+      "close_size_guide": "Close size guide",
+      "accordion_empty": "{{ heading }} is hidden: add content, or a metafield value on this product.",
+      "added_short": "Added",
+      "value_sold_out": "sold out",
+      "choose_variant": "Options"
+    },
+    "cart": {
+      "item_count": {
+        "one": "{{ count }} item",
+        "other": "{{ count }} items"
+      },
+      "empty": "Your bag is empty",
+      "continue_shopping": "Continue shopping",
+      "login_html": "Have an account? <a href=\"{{ link }}\">Log in</a> to check out faster.",
+      "items_heading": "Items in your bag",
+      "for_parent": "For {{ title }}",
+      "quantity_for": "Quantity for {{ title }}",
+      "decrease": "Decrease quantity for {{ title }}",
+      "increase": "Increase quantity for {{ title }}",
+      "remove": "Remove",
+      "line_total": "Total",
+      "update": "Update bag",
+      "summary": "Order summary",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "remove_code": "Remove discount code",
+      "discount_label": "Discount code",
+      "apply": "Apply",
+      "note": "Add a note to your order",
+      "checkout": "Checkout",
+      "updated": "Your bag has been updated",
+      "update_error": "That change couldn't be made. Please try again.",
+      "discount_error": "That code can't be applied to your bag.",
+      "shipping_discount": "Code applied. Shipping discounts are shown at checkout after you add an address.",
+      "quantity_capped": "Only [quantity] available, so your bag has been updated.",
+      "drawer_title": "Your bag",
+      "close_drawer": "Close bag",
+      "view_bag": "View bag"
+    },
+    "search": {
+      "label": "Search",
+      "placeholder": "Search the shop",
+      "submit": "Search",
+      "title": "Search",
+      "results_for": "Results for “{{ terms }}”",
+      "result_count": {
+        "one": "{{ count }} result",
+        "other": "{{ count }} results"
+      },
+      "results_heading": "Search results",
+      "type_article": "Journal",
+      "type_page": "Page",
+      "no_results": "Nothing found for “{{ terms }}”",
+      "no_results_hint": "Check the spelling, or try a broader word such as bra or set."
+    },
+    "not_found": {
+      "eyebrow": "Error 404"
+    },
+    "contact": {
+      "success": "Thank you for your message. We will be in touch soon.",
+      "error": "Please check the fields below.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "message": "Message",
+      "required": "* Required",
+      "send": "Send"
+    },
+    "blog": {
+      "topics": "Topics",
+      "empty": "No articles yet."
+    },
+    "article": {
+      "by": "By {{ author }}",
+      "back": "Back to {{ blog }}",
+      "comments": {
+        "one": "{{ count }} comment",
+        "other": "{{ count }} comments"
+      },
+      "leave_comment": "Leave a comment",
+      "comment": "Comment",
+      "post_comment": "Post comment",
+      "comment_moderated": "Thank you. Your comment will appear once it has been approved.",
+      "comment_posted": "Thank you. Your comment has been posted.",
+      "moderation_note": "Comments are approved before they appear."
     }
   }
 }

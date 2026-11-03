@@ -1,0 +1,91 @@
+{%- doc -%}
+  Removable chips for each active filter, plus "Clear all" (which keeps the current sort).
+  Renders nothing when no filter is active.
+
+  @param {object} results - A collection or search object with `filters` and `sort_by`.
+  @param {string} base_url - The listing URL without filters or sorting.
+
+  @example
+  {% render 'eva-active-filters', results: collection, base_url: collection.url %}
+{%- enddoc -%}
+
+{%- capture filter_query -%}{%- render 'eva-filter-query', results: results -%}{%- endcapture -%}
+{%- assign filter_query = filter_query | strip -%}
+
+{%- if filter_query != blank -%}
+  {%- liquid
+    assign clear_url = base_url
+    if results.sort_by != blank
+      if base_url contains '?'
+        assign clear_url = base_url | append: '&sort_by=' | append: results.sort_by
+      else
+        assign clear_url = base_url | append: '?sort_by=' | append: results.sort_by
+      endif
+    endif
+  -%}
+  <ul
+    class="eva-active-filters"
+    role="list"
+    aria-label="{{ 'eva.collection.active_filters' | t }}"
+  >
+    {%- for filter in results.filters -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+          <li>
+            <a
+              href="{{ filter.url_to_remove }}"
+              class="eva-chip"
+              rel="nofollow"
+            >
+              <span class="visually-hidden">{{ 'eva.collection.remove_filter' | t }}</span>
+              {{- filter.label | escape }}:
+              {{ filter.min_value.value | default: 0 | money }}–
+              {{- filter.max_value.value | default: filter.range_max | money -}}
+              {%- render 'eva-icon', icon: 'close', class: 'eva-active-filters__icon' -%}
+            </a>
+          </li>
+        {%- endif -%}
+      {%- else -%}
+        {%- for value in filter.active_values -%}
+          <li>
+            <a
+              href="{{ value.url_to_remove }}"
+              class="eva-chip"
+              rel="nofollow"
+            >
+              <span class="visually-hidden">{{ 'eva.collection.remove_filter' | t }}</span>
+              {{- filter.label | escape }}: {{ value.label | escape -}}
+              {%- render 'eva-icon', icon: 'close', class: 'eva-active-filters__icon' -%}
+            </a>
+          </li>
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+    <li>
+      <a
+        href="{{ clear_url | escape }}"
+        class="eva-link"
+        rel="nofollow"
+      >
+        {{- 'eva.collection.clear_all' | t -}}
+      </a>
+    </li>
+  </ul>
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-active-filters__icon {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+{% endstylesheet %}

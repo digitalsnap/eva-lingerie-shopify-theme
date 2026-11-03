@@ -1,0 +1,244 @@
+{%- comment -%}
+  The cart drawer. Rendered once from layout/theme.liquid with {% section %}, so its section id is
+  "eva-cart-drawer" on every page; add-to-bag and quantity changes ask Shopify to re-render it by
+  that id. <eva-cart data-listen-updates> refreshes it whenever anything announces a cart change and
+  opens it after an add when "Auto-open cart drawer" is on (Theme settings > Cart).
+{%- endcomment -%}
+
+{%- assign form_id = 'EvaCartDrawerForm' -%}
+
+<script
+  src="{{ 'eva-cart.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<dialog-component
+  id="eva-cart-drawer"
+  class="eva-cart-drawer"
+>
+  <dialog
+    ref="dialog"
+    class="eva-drawer eva-drawer--end eva-scheme-ivory eva-cart-drawer__dialog"
+    aria-labelledby="EvaCartDrawerTitle"
+    scroll-lock
+  >
+    <eva-cart
+      class="eva-cart--drawer"
+      data-section-id="{{ section.id }}"
+      data-listen-updates
+      {% if settings.auto_open_cart_drawer %}
+        data-auto-open
+      {% endif %}
+      data-label-updated="{{ 'eva.cart.updated' | t | escape }}"
+      data-label-error="{{ 'eva.cart.update_error' | t | escape }}"
+      data-label-quantity-capped="{{ 'eva.cart.quantity_capped' | t | escape }}"
+    >
+      <div class="eva-drawer__head">
+        <h2
+          id="EvaCartDrawerTitle"
+          class="eva-eyebrow"
+          tabindex="-1"
+          data-cart-heading
+        >
+          {{- 'eva.cart.drawer_title' | t -}}
+          {%- if cart.item_count > 0 %} ({{ cart.item_count }}){% endif -%}
+        </h2>
+        <button
+          type="button"
+          class="eva-icon-button"
+          on:click="dialog-component/closeDialog"
+          aria-label="{{ 'eva.cart.close_drawer' | t }}"
+        >
+          {%- render 'eva-icon', icon: 'close' -%}
+        </button>
+      </div>
+
+      {%- if cart.item_count == 0 -%}
+        <div class="eva-cart-drawer__empty">
+          <p class="eva-heading eva-heading--xs">{{ 'eva.cart.empty' | t }}</p>
+          <a
+            href="{{ routes.all_products_collection_url }}"
+            class="eva-button eva-button--outline"
+          >
+            {{- 'eva.cart.continue_shopping' | t -}}
+          </a>
+        </div>
+      {%- else -%}
+        {%- form 'cart', cart, id: form_id, class: 'eva-cart-drawer__form', novalidate: 'novalidate' -%}
+          <ul
+            class="eva-cart__lines eva-cart-drawer__lines"
+            role="list"
+            aria-label="{{ 'eva.cart.items_heading' | t }}"
+          >
+            {%- for item in cart.items -%}
+              {%- render 'eva-cart-line', item: item, index: forloop.index, id_prefix: 'EvaCartDrawer' -%}
+            {%- endfor -%}
+          </ul>
+
+          <div class="eva-cart-drawer__footer">
+            {%- comment -%} Same figures and labels as the cart page summary. {%- endcomment -%}
+            {%- if cart.cart_level_discount_applications.size > 0 -%}
+              <p class="eva-cart-drawer__row eva-caption">
+                <span>{{ 'eva.cart.subtotal' | t }}</span>
+                <span>{{ cart.items_subtotal_price | money }}</span>
+              </p>
+            {%- endif -%}
+            {%- for discount in cart.cart_level_discount_applications -%}
+              <p class="eva-cart-drawer__row eva-caption">
+                <span>{{ discount.title | escape }}</span>
+                <span>−{{ discount.total_allocated_amount | money }}</span>
+              </p>
+            {%- endfor -%}
+            <p class="eva-cart-drawer__row eva-cart-drawer__total">
+              <span>
+                {%- if cart.cart_level_discount_applications.size > 0 -%}
+                  {{- 'eva.cart.total' | t -}}
+                {%- else -%}
+                  {{- 'eva.cart.subtotal' | t -}}
+                {%- endif -%}
+              </span>
+              <span>
+                {%- if settings.currency_code_enabled_cart_total -%}
+                  {{ cart.total_price | money_with_currency }}
+                {%- else -%}
+                  {{ cart.total_price | money }}
+                {%- endif -%}
+              </span>
+            </p>
+            <p class="eva-caption">
+              {%- if shop.taxes_included -%}
+                {{ 'eva.product.tax_included' | t }}
+              {%- else -%}
+                {{ 'eva.product.tax_excluded' | t }}
+              {%- endif %}
+              {{ 'eva.product.shipping_at_checkout' | t -}}
+            </p>
+            <button
+              type="submit"
+              name="checkout"
+              class="eva-button eva-button--primary eva-cart-drawer__checkout"
+            >
+              {{- 'eva.cart.checkout' | t -}}
+            </button>
+            <a
+              href="{{ routes.cart_url }}"
+              class="eva-link eva-cart-drawer__view"
+            >
+              {{- 'eva.cart.view_bag' | t -}}
+            </a>
+          </div>
+        {%- endform -%}
+      {%- endif -%}
+    </eva-cart>
+
+    <p
+      class="visually-hidden"
+      role="status"
+      data-cart-status
+    ></p>
+  </dialog>
+</dialog-component>
+
+{% stylesheet %}
+  .eva-cart-drawer__dialog {
+    display: none;
+    width: min(28rem, 100vw);
+    padding-block-end: 0;
+  }
+
+  .eva-cart-drawer__dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .eva-cart--drawer {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .eva-cart--drawer[aria-busy='true'] .eva-cart-drawer__form {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .eva-cart-drawer__empty {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    text-align: center;
+  }
+
+  .eva-cart-drawer__form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .eva-cart-drawer__lines {
+    flex: 1;
+    border-block-start: 0;
+  }
+
+  /* The drawer is narrow: image and details side by side, line total under the details. */
+  .eva-cart-drawer__lines .eva-cart__line {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+  }
+
+  .eva-cart-drawer__lines .eva-cart__media {
+    grid-row: span 2;
+  }
+
+  .eva-cart-drawer__lines .eva-cart__line-price {
+    grid-column: 2;
+    align-items: flex-start;
+  }
+
+  .eva-cart-drawer__footer {
+    position: sticky;
+    inset-block-end: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-inline: -1.5rem;
+    padding: 1.25rem 1.5rem 1.5rem;
+    border-block-start: 1px solid var(--eva-line);
+    background-color: var(--eva-bg);
+  }
+
+  .eva-cart-drawer__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .eva-cart-drawer__total {
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 1rem;
+  }
+
+  .eva-cart-drawer__checkout {
+    width: 100%;
+    min-height: 3.125rem;
+  }
+
+  .eva-cart-drawer__view {
+    align-self: center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.cart_drawer",
+  "class": "eva-cart-drawer-section",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,331 @@
+{%- doc -%}
+  Side drawer of storefront filters as a plain GET form: applying reloads the listing with
+  Shopify's filter parameters, so filtering needs no JavaScript beyond opening the drawer.
+  Query parameters already in `base_url` (e.g. a search's `q`) and the current sort are kept.
+  Renders nothing when there are no filters to show.
+
+  @param {object} results - A collection or search object (filters, sort_by).
+  @param {string} base_url - The listing URL without filters or sorting.
+  @param {string} drawer_id - The id for the drawer's dialog-component (opened by `eva-facet-actions`).
+  @param {string} [skip_param] - A filter param_name shown elsewhere; its selection is kept as hidden fields.
+
+  @example
+  {% render 'eva-filter-drawer', results: collection, base_url: collection.url, drawer_id: drawer_id %}
+{%- enddoc -%}
+
+{%- liquid
+  assign drawer_filter_count = 0
+  for filter in results.filters
+    if filter.param_name != skip_param
+      assign drawer_filter_count = drawer_filter_count | plus: 1
+    endif
+  endfor
+
+  assign url_parts = base_url | split: '?'
+  assign form_action = url_parts[0]
+  assign base_query = url_parts[1] | default: ''
+
+  assign clear_url = base_url
+  if results.sort_by != blank
+    if base_url contains '?'
+      assign clear_url = base_url | append: '&sort_by=' | append: results.sort_by
+    else
+      assign clear_url = base_url | append: '?sort_by=' | append: results.sort_by
+    endif
+  endif
+-%}
+
+{%- if drawer_filter_count > 0 -%}
+  <dialog-component id="{{ drawer_id }}">
+    <dialog
+      ref="dialog"
+      class="eva-drawer eva-drawer--end eva-scheme-ivory eva-filters"
+      aria-labelledby="{{ drawer_id }}-Title"
+      scroll-lock
+    >
+      <form
+        action="{{ form_action }}"
+        method="get"
+        class="eva-filters__form"
+      >
+        <div class="eva-drawer__head">
+          <h2
+            id="{{ drawer_id }}-Title"
+            class="eva-eyebrow"
+          >
+            {{- 'eva.collection.filter' | t -}}
+          </h2>
+          <button
+            type="button"
+            class="eva-icon-button"
+            on:click="dialog-component/closeDialog"
+            aria-label="{{ 'eva.collection.close_filters' | t }}"
+          >
+            {%- render 'eva-icon', icon: 'close' -%}
+          </button>
+        </div>
+
+        {%- comment -%} Keep what defines the listing (search terms, type) and the current sort. {%- endcomment -%}
+        {%- assign base_params = base_query | split: '&' -%}
+        {%- for param in base_params -%}
+          {%- assign pair = param | split: '=' -%}
+          {%- if pair[0] != blank -%}
+            <input
+              type="hidden"
+              name="{{ pair[0] | url_decode | escape }}"
+              value="{{ pair[1] | default: '' | url_decode | escape }}"
+            >
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if results.sort_by != blank -%}
+          <input
+            type="hidden"
+            name="sort_by"
+            value="{{ results.sort_by | escape }}"
+          >
+        {%- endif -%}
+
+        {%- assign group_number = 0 -%}
+        {%- for filter in results.filters -%}
+          {%- if filter.param_name == skip_param -%}
+            {%- for value in filter.active_values -%}
+              <input
+                type="hidden"
+                name="{{ value.param_name }}"
+                value="{{ value.value | escape }}"
+              >
+            {%- endfor -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          {%- assign group_number = group_number | plus: 1 -%}
+          <details
+            class="eva-filters__group"
+            {% if group_number <= 3 or filter.active_values.size > 0 %}
+              open
+            {% endif %}
+          >
+            <summary class="eva-filters__summary">
+              {{- filter.label | escape -}}
+              {%- render 'eva-icon', icon: 'chevron', class: 'eva-filters__chevron' -%}
+            </summary>
+
+            {%- case filter.type -%}
+              {%- when 'price_range' -%}
+                {%- assign price_max = filter.range_max | divided_by: 100.0 | ceil -%}
+                <fieldset class="eva-filters__price">
+                  <legend class="visually-hidden">{{ filter.label | escape }}</legend>
+                  <label class="eva-filters__price-field">
+                    <span class="eva-caption">{{ 'eva.collection.price_from' | t }} ({{ cart.currency.symbol }})</span>
+                    <input
+                      class="eva-filters__input"
+                      type="number"
+                      name="{{ filter.min_value.param_name }}"
+                      inputmode="decimal"
+                      min="0"
+                      max="{{ price_max }}"
+                      step="0.01"
+                      placeholder="0"
+                      {% if filter.min_value.value != nil %}
+                        value="{{ filter.min_value.value | divided_by: 100.0 }}"
+                      {% endif %}
+                    >
+                  </label>
+                  <label class="eva-filters__price-field">
+                    <span class="eva-caption">{{ 'eva.collection.price_to' | t }} ({{ cart.currency.symbol }})</span>
+                    <input
+                      class="eva-filters__input"
+                      type="number"
+                      name="{{ filter.max_value.param_name }}"
+                      inputmode="decimal"
+                      min="0"
+                      max="{{ price_max }}"
+                      step="0.01"
+                      placeholder="{{ price_max }}"
+                      {% if filter.max_value.value != nil %}
+                        value="{{ filter.max_value.value | divided_by: 100.0 }}"
+                      {% endif %}
+                    >
+                  </label>
+                </fieldset>
+              {%- else -%}
+                <fieldset class="eva-filters__options">
+                  <legend class="visually-hidden">{{ filter.label | escape }}</legend>
+                  {%- for value in filter.values -%}
+                    {%- liquid
+                      assign value_disabled = false
+                      if value.count == 0 and value.active == false
+                        assign value_disabled = true
+                      endif
+                    -%}
+                    {%- assign swatch_style = '' -%}
+                    {%- if filter.presentation == 'swatch' -%}
+                      {%- capture swatch_style -%}
+                        {%- render 'eva-swatch-style', swatch: value.swatch, name: value.label -%}
+                      {%- endcapture -%}
+                    {%- endif -%}
+                    <label class="eva-filters__option{% if value_disabled %} eva-filters__option--disabled{% endif %}">
+                      <input
+                        type="checkbox"
+                        name="{{ value.param_name }}"
+                        value="{{ value.value | escape }}"
+                        {% if value.active %}
+                          checked
+                        {% endif %}
+                        {% if value_disabled %}
+                          disabled
+                        {% endif %}
+                      >
+                      {%- if swatch_style != blank -%}
+                        <span
+                          class="eva-filters__swatch"
+                          style="{{ swatch_style }}"
+                          aria-hidden="true"
+                        ></span>
+                      {%- endif -%}
+                      <span>{{ value.label | escape }}</span>
+                      <span class="eva-filters__count">({{ value.count }})</span>
+                    </label>
+                  {%- endfor -%}
+                </fieldset>
+            {%- endcase -%}
+          </details>
+        {%- endfor -%}
+
+        <div class="eva-filters__foot">
+          <a
+            href="{{ clear_url | escape }}"
+            class="eva-link"
+            rel="nofollow"
+          >
+            {{- 'eva.collection.clear_all' | t -}}
+          </a>
+          <button
+            type="submit"
+            class="eva-button eva-button--primary"
+          >
+            {{- 'eva.collection.show_results' | t -}}
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </dialog-component>
+{%- endif -%}
+
+{% stylesheet %}
+  .eva-filters__form {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  .eva-filters__group {
+    border-block-end: 1px solid var(--eva-line);
+  }
+
+  .eva-filters__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.25rem;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.6875rem;
+    letter-spacing: var(--eva-tracking-label);
+    text-transform: uppercase;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .eva-filters__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .eva-filters__chevron {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .eva-filters__group[open] .eva-filters__chevron {
+    transform: rotate(180deg);
+  }
+
+  .eva-filters__options,
+  .eva-filters__price {
+    margin: 0;
+    padding: 0 0 1rem;
+    border: 0;
+  }
+
+  .eva-filters__options {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .eva-filters__option {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  .eva-filters__option input {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+    accent-color: var(--eva-charcoal);
+  }
+
+  .eva-filters__option--disabled {
+    color: var(--eva-grey);
+    cursor: not-allowed;
+  }
+
+  .eva-filters__swatch {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 1px solid var(--eva-border);
+    background-size: cover;
+  }
+
+  .eva-filters__count {
+    color: var(--eva-muted);
+    font-size: 0.75rem;
+  }
+
+  .eva-filters__price {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .eva-filters__price-field {
+    display: grid;
+    gap: 0.375rem;
+  }
+
+  .eva-filters__input {
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--eva-border);
+    border-radius: 0;
+    background-color: #fff;
+    color: var(--eva-charcoal);
+    font-size: 0.875rem;
+  }
+
+  .eva-filters__foot {
+    position: sticky;
+    inset-block-end: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-start: auto;
+    padding-block: 1.25rem;
+    background-color: var(--eva-bg);
+  }
+{% endstylesheet %}
