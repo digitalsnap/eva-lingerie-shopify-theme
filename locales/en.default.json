@@ -553,7 +553,6 @@
       "moderation_note": "Comments are approved before they appear."
     },
     "password": {
-      "enter": "Enter using password",
       "dialog_title": "Enter the store",
       "close": "Close",
       "password_label": "Password",

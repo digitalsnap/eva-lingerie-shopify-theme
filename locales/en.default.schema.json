@@ -1432,7 +1432,7 @@
       "recommendations_metafield": "A product list metafield, for example custom.complete_the_set. Products without it fall back to Shopify's recommendations.",
       "recommendation_intent": "Complementary products are chosen in the Search & Discovery app.",
       "quick_add": "Leave off with the Eva product page: quick add reads the original Horizon product layout, which Eva replaces.",
-      "password_text": "Defaults to the message set in Online Store > Preferences > Password protection.",
+      "password_text": "Leave blank to use the message set in Online Store > Preferences > Password protection.",
       "chat_drawer": "Turn on only if Shopify Inbox is installed. When off, Inbox shows its usual floating chat and every page loads less code.",
       "media_text": "Light text with a soft shade suits darker images; dark text suits pale images. Light text always keeps a light shade so it stays readable.",
       "cta_label": "Shown on large tiles. Leave blank to hide.",
@@ -1444,7 +1444,9 @@
       "consent": "Required by email marketing laws in many regions.",
       "one_tap": "Reveals the code without asking for an email.",
       "welcome_delay": "Also opens when the visitor reaches the footer, whichever comes first.",
-      "welcome_auto_mobile": "Off by default: full-screen pop-ups on phones can hurt search rankings. Phones see the corner tab instead."
+      "welcome_auto_mobile": "Off by default: full-screen pop-ups on phones can hurt search rankings. Phones see the corner tab instead.",
+      "password_image": "Shown beside the title. Leave blank to use the theme’s own photo.",
+      "password_heading": "Shown in the heading font. Defaults to the store name."
     },
     "options": {
       "ivory": "Ivory",
