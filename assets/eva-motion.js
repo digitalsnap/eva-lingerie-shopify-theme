@@ -1,13 +1,15 @@
 /**
  * Eva motion: content fades up as it scrolls into view, and scrolling text bands can be paused.
  *
- * Runs only when the theme's motion setting is on and the visitor hasn't asked for reduced motion
- * (snippets/eva-head.liquid then sets `eva-motion` on <html>). Elements marked [data-eva-reveal] start
+ * Reveals run only when the theme's motion and scroll-reveal settings are on and the visitor hasn't
+ * asked for reduced motion (snippets/eva-head.liquid then sets `eva-reveal` on <html>). Elements marked [data-eva-reveal] start
  * hidden in CSS, but only once this script has marked <html> with `eva-motion-js`, so if it never
  * loads they simply stay visible. Animations use transform and opacity only: no layout shift.
  */
 
 const root = document.documentElement;
+// The script is here, so controls it powers (the moving-text pause button) can show.
+root.classList.add('eva-motion-ready');
 const STAGGER_MS = 90;
 const MAX_STAGGER = 5;
 
@@ -45,7 +47,7 @@ function watch(scope) {
   }
 }
 
-if (root.classList.contains('eva-motion')) {
+if (root.classList.contains('eva-reveal')) {
   // Already on screen when this runs: leave it as it is, so nothing visible blinks out and back in.
   for (const element of document.querySelectorAll('[data-eva-reveal]')) {
     if (element.getBoundingClientRect().top < window.innerHeight) reveal(element);

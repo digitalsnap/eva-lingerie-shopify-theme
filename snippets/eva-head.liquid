@@ -24,16 +24,22 @@
   {{ settings.type_subheading_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
 {%- endunless -%}
 
+{%- comment -%} The homepage sets its hero words in the italic accent face, above the fold. {%- endcomment -%}
+{%- unless template.name != 'index' or settings.type_accent_font.system? -%}
+  {{ settings.type_accent_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
+{%- endunless -%}
+
 {{ 'eva-base.css' | asset_url | stylesheet_tag: preload: true }}
 
 {%- if settings.eva_motion -%}
   {%- comment -%}
     Decided before first paint so nothing jumps: visitors who ask for reduced motion get none.
-    assets/eva-motion.js adds the scroll reveals; the drift and the headline rise are CSS.
+    Everything that moves on load is CSS on transform and opacity; assets/eva-motion.js only adds
+    the optional scroll reveals and the moving-text pause button.
   {%- endcomment -%}
   <script>
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.documentElement.classList.add('eva-motion'{% if settings.eva_motion_ambient %}, 'eva-ambient'{% endif %});
+      document.documentElement.classList.add('eva-motion'{% if settings.eva_motion_ambient %}, 'eva-ambient'{% endif %}{% if settings.eva_motion_reveal %}, 'eva-reveal'{% endif %});
     }
   </script>
   <script

@@ -25,7 +25,8 @@
         "button_label": "Shop the edit",
         "button_link": "shopify://collections/all",
         "button_style": "outline"
-      }
+      },
+      "disabled": true
     },
     "signature": {
       "type": "eva-marquee",
@@ -37,7 +38,8 @@
         "color_scheme": "ivory",
         "padding_top": 28,
         "padding_bottom": 28
-      }
+      },
+      "disabled": true
     },
     "categories": {
       "type": "eva-category-tiles",
@@ -86,14 +88,14 @@
         "tile_sleep"
       ],
       "settings": {
-        "layout": "editorial",
+        "layout": "arch",
         "cta_label": "Shop now",
-        "heading": "Shop by category",
-        "hide_heading": true,
-        "tile_ratio": "1 / 1",
+        "heading": "Find your piece",
+        "hide_heading": false,
+        "tile_ratio": "5 / 7",
         "color_scheme": "ivory",
-        "padding_top": 4,
-        "padding_bottom": 4
+        "padding_top": 24,
+        "padding_bottom": 112
       }
     },
     "best_sellers": {
@@ -112,7 +114,8 @@
         "button_label": "View collection",
         "button_link": "shopify://collections/all",
         "button_style": "outline"
-      }
+      },
+      "disabled": true
     },
     "silk_edit": {
       "type": "eva-featured-collection",
@@ -126,8 +129,8 @@
         "image_ratio": "3 / 4",
         "show_secondary_image": false,
         "color_scheme": "ivory",
-        "padding_top": 96,
-        "padding_bottom": 96
+        "padding_top": 24,
+        "padding_bottom": 112
       }
     },
     "fit_care": {
@@ -144,27 +147,110 @@
         "button_style": "outline",
         "padding_top": 72,
         "padding_bottom": 72
-      }
+      },
+      "disabled": true
     },
     "newsletter": {
       "type": "eva-newsletter",
       "settings": {
-        "heading": "Newsletter",
-        "text": "Early access to new drops and private offers.",
+        "heading": "Letters from Eva",
+        "text": "New pieces, private offers and notes on fit, about once a month.",
         "placeholder": "Your email",
         "button_label": "Subscribe",
         "color_scheme": "ivory",
-        "padding_top": 88,
-        "padding_bottom": 88
+        "padding_top": 128,
+        "padding_bottom": 128,
+        "style": "arch"
+      }
+    },
+    "ribbon": {
+      "type": "eva-ribbon",
+      "settings": {
+        "tone": 22,
+        "draw_on_scroll": true
+      }
+    },
+    "arch_hero": {
+      "type": "eva-arch-hero",
+      "settings": {
+        "heading": "Silk, lace & mesh lingerie",
+        "word_start": "Softly,",
+        "word_end": "boldly.",
+        "text": "Satin, lace and a single ribbon. Lingerie with a soft touch and a strong line.",
+        "button_label": "Shop the collection",
+        "button_link": "shopify://collections/all",
+        "color_scheme": "ivory",
+        "padding_top": 48,
+        "padding_bottom": 96
+      }
+    },
+    "bodysuit": {
+      "type": "eva-media-text",
+      "settings": {
+        "image_position": "start",
+        "image_ratio": "4 / 5",
+        "image_shape": "oval",
+        "color_scheme": "ivory",
+        "eyebrow": "Signature",
+        "heading": "The Eva Bodysuit",
+        "text": "<p>Our signature piece. Wear it on its own, or complete the set.</p>",
+        "button_label": "Discover the bodysuit",
+        "button_link": "shopify://collections/all",
+        "button_style": "outline",
+        "products_heading": "Complete the set",
+        "products": [],
+        "padding_top": 24,
+        "padding_bottom": 128
+      }
+    },
+    "notes": {
+      "type": "eva-notes",
+      "blocks": {
+        "note_fabric": {
+          "type": "note",
+          "settings": {
+            "text": "Silk, lace and mesh, chosen for how they feel first",
+            "link": ""
+          }
+        },
+        "note_fit": {
+          "type": "note",
+          "settings": {
+            "text": "A size guide in cm and inches for every style",
+            "link": ""
+          }
+        },
+        "note_offer": {
+          "type": "note",
+          "settings": {
+            "text": "10% off your first order when you join the list",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "note_fabric",
+        "note_fit",
+        "note_offer"
+      ],
+      "settings": {
+        "heading": "Why Eva",
+        "color_scheme": "ivory",
+        "padding_top": 24,
+        "padding_bottom": 24
       }
     }
   },
   "order": [
+    "ribbon",
+    "arch_hero",
     "hero",
     "signature",
     "categories",
-    "best_sellers",
     "silk_edit",
+    "bodysuit",
+    "best_sellers",
+    "notes",
     "fit_care",
     "newsletter"
   ]

@@ -19,9 +19,27 @@
   fetchpriority="low"
 ></script>
 
+{%- if section.settings.layout == 'stacked' -%}
+  {%- liquid
+    # Logo row: the logo (or the 36px wordmark) plus 36px of padding; menu row: 44px links and a hairline.
+    assign stacked_logo = 36
+    if settings.logo != blank
+      assign stacked_logo = settings.logo_height
+    endif
+    assign stacked_height = stacked_logo | plus: 82
+  -%}
+  {%- style -%}
+    @media screen and (min-width: 990px) {
+      :root {
+        --eva-header-height: {{ stacked_height }}px;
+      }
+    }
+  {%- endstyle -%}
+{%- endif -%}
+
 <div
   id="header-component"
-  class="eva-header eva-scheme-{{ section.settings.color_scheme }}"
+  class="eva-header eva-header--{{ section.settings.layout }} eva-scheme-{{ section.settings.color_scheme }}"
   {% if section.settings.sticky %}
     data-sticky-state="active"
   {% endif %}
@@ -454,6 +472,37 @@
     .eva-header__logo-image {
       height: var(--eva-logo-height);
     }
+
+    /* Stacked: the logo alone on the top row, the menu centred on a hairline row beneath it. */
+    .eva-header--stacked .eva-header__start {
+      display: contents;
+    }
+
+    .eva-header--stacked .eva-header__logo {
+      grid-column: 2;
+      grid-row: 1;
+      padding-block: 1.25rem 1rem;
+    }
+
+    .eva-header--stacked .eva-header__end {
+      grid-column: 3;
+      grid-row: 1;
+    }
+
+    .eva-header--stacked .eva-header__nav {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      border-block-start: 1px solid var(--eva-line);
+    }
+
+    .eva-header--stacked .eva-header__menu {
+      justify-content: center;
+      gap: 0 2.5rem;
+    }
+
+    .eva-header--stacked .eva-header__wordmark {
+      font-size: 2.25rem;
+    }
   }
 
   /* Mobile menu drawer (the drawer shell lives in eva-base.css) */
@@ -512,6 +561,17 @@
       "id": "wordmark",
       "label": "t:eva.settings.wordmark",
       "info": "t:eva.info.wordmark"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "t:eva.settings.layout",
+      "info": "t:eva.info.header_layout",
+      "options": [
+        { "value": "inline", "label": "t:eva.options.header_inline" },
+        { "value": "stacked", "label": "t:eva.options.header_stacked" }
+      ],
+      "default": "inline"
     },
     {
       "type": "checkbox",

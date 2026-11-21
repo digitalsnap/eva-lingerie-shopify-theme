@@ -8,7 +8,8 @@
   @param {object} [image] - An image object; a placeholder is shown when blank.
   @param {string} [sizes] - The image `sizes` attribute.
   @param {string} [loading] - 'lazy' (default) or 'eager'.
-  @param {string} [size] - 'regular' (default) or 'large' (bigger name, room for a call to action).
+  @param {string} [size] - 'regular' (default), 'large' (bigger name, room for a call to action) or
+    'arch' (an arch-topped photograph with the name set beneath it).
   @param {string} [cta] - A short call to action under the name, e.g. "Shop now".
 
   @example
@@ -22,7 +23,7 @@
 
 <a
   href="{{ url }}"
-  class="eva-tile__link{% if size == 'large' %} eva-tile__link--large{% endif %}"
+  class="eva-tile__link eva-tile__link--{{ size | default: 'regular' }}"
 >
   <span class="eva-tile__media eva-media">
     {%- if image != blank -%}
@@ -79,9 +80,6 @@
     transition: transform 1.2s var(--eva-ease);
   }
 
-  .eva-tile__link:hover .eva-tile__media img {
-    transform: scale(1.04);
-  }
 
   .eva-tile__link:focus-visible {
     outline: 2px solid var(--eva-fg);
@@ -131,7 +129,54 @@
     transition: border-color var(--eva-duration) var(--eva-ease);
   }
 
-  .eva-tile__link:hover .eva-tile__cta {
-    border-color: transparent;
+  @media (hover: hover) and (pointer: fine) {
+    .eva-tile__link:hover .eva-tile__media img {
+      transform: scale(1.03);
+    }
+
+    .eva-tile__link:hover .eva-tile__cta {
+      border-color: transparent;
+    }
+
+    .eva-tile__link--arch:hover .eva-tile__media {
+      transform: translateY(-3px);
+    }
+  }
+
+  /* Arch: the photograph under an arched top, the name set beneath it in the page's own colour. */
+  .eva-tile__link--arch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    aspect-ratio: auto;
+    overflow: visible;
+    color: var(--eva-fg, var(--eva-charcoal));
+  }
+
+  .eva-tile__link--arch .eva-tile__media {
+    position: relative;
+    inset: auto;
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--eva-tile-ratio, 5 / 7);
+    border-radius: 999px 999px 0 0;
+    transition: transform 600ms var(--eva-ease-out);
+  }
+
+  .eva-tile__link--arch .eva-tile__media::after {
+    content: none;
+  }
+
+  .eva-tile__link--arch .eva-tile__text {
+    position: static;
+    gap: 0.5rem;
+  }
+
+  .eva-tile__link--arch .eva-tile__label {
+    font-size: clamp(1.5rem, 1.1rem + 0.9vw, 2rem);
+    font-weight: var(--font-heading--weight);
+    letter-spacing: 0;
+    text-transform: none;
   }
 {% endstylesheet %}

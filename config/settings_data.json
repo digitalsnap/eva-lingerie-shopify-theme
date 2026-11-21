@@ -111,7 +111,8 @@
     "quick_add": false,
     "mobile_quick_add": false,
     "auto_open_cart_drawer": true,
-    "eva_color_ivory": "#FFFFFF"
+    "eva_color_ivory": "#FFFFFF",
+    "eva_color_blush": "#F1E7E0"
   },
   "presets": {
     "Horizon": {

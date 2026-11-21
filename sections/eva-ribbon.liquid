@@ -1,0 +1,116 @@
+{%- comment -%}
+  One fine line that runs down the whole page behind the other sections. No JavaScript and no image:
+  an inline SVG stretched to the page's height. Plain white sections let it show through; photographs
+  and cards pass over it. Where the browser supports scroll-driven animations it draws itself as the
+  visitor scrolls; elsewhere, and for visitors who prefer reduced motion, it is simply there.
+{%- endcomment -%}
+<div
+  class="eva-ribbon{% if section.settings.draw_on_scroll %} eva-ribbon--draw{% endif %}"
+  style="--eva-ribbon-tone: {{ section.settings.tone }}%;"
+  aria-hidden="true"
+>
+  <svg
+    class="eva-ribbon__svg"
+    viewBox="0 0 1440 4000"
+    preserveAspectRatio="none"
+    focusable="false"
+  >
+    <path
+      vector-effect="non-scaling-stroke"
+      d="M720 120 C 1250 360 1390 820 1040 1080 C 760 1290 170 1310 150 1720 C 130 2120 1290 2090 1310 2520 C 1330 2900 270 2960 250 3360 C 236 3640 600 3780 720 3900"
+    ></path>
+  </svg>
+</div>
+
+{% stylesheet %}
+  /* The line sits behind main's sections, so main becomes their stacking context. */
+  main:has(> .eva-ribbon-section) {
+    position: relative;
+    isolation: isolate;
+  }
+
+  main:has(> .eva-ribbon-section) .eva-section.eva-scheme-ivory:not(.eva-section--solid) {
+    background-color: transparent;
+  }
+
+  /* clip, not hidden: a hidden overflow would make this wrapper the scroll timeline's container. */
+  .eva-ribbon-section {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: clip;
+    pointer-events: none;
+  }
+
+  .eva-ribbon,
+  .eva-ribbon__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .eva-ribbon__svg path {
+    fill: none;
+    stroke: color-mix(in srgb, var(--eva-wine) var(--eva-ribbon-tone, 22%), #fff);
+    stroke-width: 1px;
+    stroke-linecap: round;
+  }
+
+  /* Revealed from the top as the page scrolls, by the scroll position itself: no script. */
+  @supports (animation-timeline: scroll()) {
+    html.eva-motion .eva-ribbon--draw {
+      animation: eva-ribbon-draw linear both;
+      animation-timeline: scroll();
+    }
+  }
+
+  @keyframes eva-ribbon-draw {
+    from {
+      clip-path: inset(0 0 82% 0);
+    }
+
+    to {
+      clip-path: inset(0);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:eva.sections.ribbon",
+  "class": "eva-ribbon-section",
+  "limit": 1,
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:eva.content.ribbon_info"
+    },
+    {
+      "type": "range",
+      "id": "tone",
+      "label": "t:eva.settings.ribbon_tone",
+      "info": "t:eva.info.ribbon_tone",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "%",
+      "default": 22
+    },
+    {
+      "type": "checkbox",
+      "id": "draw_on_scroll",
+      "label": "t:eva.settings.ribbon_draw",
+      "info": "t:eva.info.ribbon_draw",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:eva.sections.ribbon"
+    }
+  ]
+}
+{% endschema %}

@@ -27,7 +27,8 @@
         "show_search": true,
         "show_account": true,
         "sticky": true,
-        "color_scheme": "ivory"
+        "color_scheme": "ivory",
+        "layout": "stacked"
       }
     }
   },

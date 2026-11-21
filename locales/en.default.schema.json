@@ -1267,12 +1267,16 @@
       "predictive_search": "Eva predictive search",
       "password": "Eva password page",
       "marquee": "Eva moving text",
-      "welcome_offer": "Eva welcome offer"
+      "welcome_offer": "Eva welcome offer",
+      "ribbon": "Eva ribbon line",
+      "arch_hero": "Eva arch hero",
+      "notes": "Eva notes"
     },
     "blocks": {
       "footer_menu": "Footer menu",
       "category_tile": "Category tile",
-      "product_accordion": "Product details row"
+      "product_accordion": "Product details row",
+      "note": "Note"
     },
     "presets": {
       "hero": "Eva hero",
@@ -1296,7 +1300,9 @@
       "apps": "Apps",
       "motion": "Motion",
       "welcome_info": "Sign-ups are saved as customers with email marketing consent and tagged newsletter and welcome-offer, ready for Shopify Email or Klaviyo automations.",
-      "welcome_timing": "Timing"
+      "welcome_timing": "Timing",
+      "ribbon_info": "Place this first on the page. The line runs behind the other sections and shows through white backgrounds.",
+      "complete_the_set": "Complete the set"
     },
     "settings": {
       "ivory": "Ivory (page ground)",
@@ -1401,7 +1407,15 @@
       "welcome_teaser": "Show corner tab",
       "welcome_teaser_label": "Tab label",
       "welcome_dismiss_days": "Ask again after",
-      "welcome_hide_subscribers": "Hide for subscribed customers"
+      "welcome_hide_subscribers": "Hide for subscribed customers",
+      "ribbon_tone": "Line strength",
+      "ribbon_draw": "Draw the line as the page scrolls",
+      "word_start": "Word before the photo",
+      "word_end": "Word after the photo",
+      "image_shape": "Image shape",
+      "products": "Products",
+      "style": "Style",
+      "motion_reveal": "Fade sections in as they scroll into view"
     },
     "info": {
       "gold_text": "Antique gold fails contrast on ivory and blush, so small gold text there uses this darker tone.",
@@ -1446,7 +1460,15 @@
       "welcome_delay": "Also opens when the visitor reaches the footer, whichever comes first.",
       "welcome_auto_mobile": "Off by default: full-screen pop-ups on phones can hurt search rankings. Phones see the corner tab instead.",
       "password_image": "Shown beside the title. Leave blank to use the theme’s own photo.",
-      "password_heading": "Shown in the heading font. Defaults to the store name."
+      "password_heading": "Shown in the heading font. Defaults to the store name.",
+      "ribbon_tone": "How much burgundy is in the line. Lower is lighter and quieter.",
+      "ribbon_draw": "Uses the browser's own scroll-driven animation, no script. Browsers without it, and visitors who prefer less motion, see the finished line.",
+      "arch_image": "Shown under an arched top. A portrait photograph works best, about 3:4.",
+      "arch_heading": "The page's main heading, set small above the two words. Say what you sell.",
+      "notes_heading": "Not shown; screen readers use it to introduce the notes.",
+      "header_layout": "Stacked suits a centred homepage such as the Ribbon direction.",
+      "set_products": "Up to three pieces listed under the text, each linking to its product.",
+      "motion_reveal": "Off by default. Fading every section in can feel busy and delays when content appears."
     },
     "options": {
       "ivory": "Ivory",
@@ -1482,7 +1504,15 @@
       "dark_text": "Dark",
       "layout_large": "Large, uniform",
       "layout_row": "Compact row",
-      "small": "Small"
+      "small": "Small",
+      "header_inline": "Logo between menu and icons",
+      "header_stacked": "Logo on top, menu below",
+      "layout_arch": "Arches",
+      "shape_rectangle": "Rectangle",
+      "shape_arch": "Arch",
+      "shape_oval": "Oval",
+      "style_band": "Band",
+      "style_arch": "Arch"
     }
   }
 }

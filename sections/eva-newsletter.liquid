@@ -5,7 +5,7 @@
 -%}
 
 <div
-  class="eva-newsletter eva-section eva-scheme-{{ section.settings.color_scheme }}"
+  class="eva-newsletter eva-newsletter--{{ section.settings.style }} eva-section eva-scheme-{{ section.settings.color_scheme }}"
   style="--eva-pt: {{ section.settings.padding_top }}px; --eva-pb: {{ section.settings.padding_bottom }}px;"
 >
   <div
@@ -135,6 +135,27 @@
       flex: 1 1 100%;
     }
   }
+
+  /* Arch: the sign-up framed by an arched hairline, on a solid ground the ribbon passes behind. */
+  .eva-newsletter--arch .eva-newsletter__inner {
+    max-inline-size: 35rem;
+    margin-inline: auto;
+    padding: clamp(4.5rem, 9vw, 6.5rem) clamp(1.25rem, 4vw, 3.5rem) clamp(2.5rem, 5vw, 3.5rem);
+    border: 1px solid var(--eva-line);
+    border-block-end: 0;
+    border-radius: 999px 999px 0 0;
+    background-color: var(--eva-bg);
+  }
+
+  .eva-newsletter--arch .eva-newsletter__form {
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .eva-newsletter--arch .eva-newsletter__input {
+    flex: none;
+    text-align: center;
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -172,6 +193,16 @@
       "id": "button_label",
       "label": "t:eva.settings.button_label",
       "default": "Subscribe"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "t:eva.settings.style",
+      "options": [
+        { "value": "band", "label": "t:eva.options.style_band" },
+        { "value": "arch", "label": "t:eva.options.style_arch" }
+      ],
+      "default": "band"
     },
     {
       "type": "select",

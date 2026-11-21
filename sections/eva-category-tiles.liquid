@@ -16,7 +16,7 @@
   {%- endif -%}
 
   {%- comment -%} Large tiles run edge to edge, like full-width editorial banners. {%- endcomment -%}
-  <div class="{% if section.settings.layout == 'row' %}eva-page{% else %}eva-tiles__bleed{% endif %}">
+  <div class="{% if section.settings.layout == 'editorial' %}eva-tiles__bleed{% else %}eva-page{% endif %}">
     <ul
       class="eva-tiles__list"
       role="list"
@@ -72,7 +72,23 @@
     gap: 4px;
   }
 
+  /* Arch: four arched photographs in a row, two by two on phones. */
+  .eva-tiles--arch .eva-tiles__heading {
+    margin-block-end: clamp(2rem, 4vw, 3rem);
+  }
+
+  .eva-tiles--arch .eva-tiles__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.25rem 1rem;
+  }
+
   @media screen and (min-width: 750px) {
+    .eva-tiles--arch .eva-tiles__list {
+      grid-template-columns: repeat(var(--eva-tile-count), minmax(0, 1fr));
+      gap: 1.75rem;
+    }
+
     .eva-tiles--editorial .eva-tiles__list {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -117,6 +133,7 @@
       "label": "t:eva.settings.layout",
       "options": [
         { "value": "editorial", "label": "t:eva.options.layout_large" },
+        { "value": "arch", "label": "t:eva.options.layout_arch" },
         { "value": "row", "label": "t:eva.options.layout_row" }
       ],
       "default": "editorial"
@@ -149,7 +166,8 @@
         { "value": "4 / 5", "label": "4:5" },
         { "value": "3 / 4", "label": "3:4" },
         { "value": "1 / 1", "label": "1:1" },
-        { "value": "8 / 7", "label": "8:7" }
+        { "value": "8 / 7", "label": "8:7" },
+        { "value": "5 / 7", "label": "5:7" }
       ],
       "default": "1 / 1"
     },

@@ -9,7 +9,7 @@
   --eva-page-max: 82.5rem;
   --eva-header-height: 3.5rem;
   /* Shown behind images while they load: a whisper of warmth on the white page. */
-  --eva-media-tint: color-mix(in srgb, var(--eva-charcoal) 4%, var(--eva-ivory));
+  --eva-media-tint: color-mix(in srgb, var(--eva-blush) 55%, var(--eva-ivory));
   --eva-tracking-label: 0.22em;
   --eva-tracking-nav: 0.14em;
   --eva-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -260,6 +260,11 @@ summary::-webkit-details-marker {
 
 .eva-section {
   padding-block: calc(var(--eva-pt, 0px) * 0.6) calc(var(--eva-pb, 0px) * 0.6);
+}
+
+/* Keeps its ground even when the ribbon line (sections/eva-ribbon.liquid) clears white sections. */
+.eva-section--solid {
+  background-color: var(--eva-bg);
 }
 
 @media screen and (min-width: 750px) {
@@ -772,7 +777,7 @@ html.eva-motion .eva-rise {
   }
 }
 
-html.eva-ambient :is(.eva-banner__image, .is-entering .eva-tile__media img) {
+html.eva-ambient :is(.eva-banner__image, .eva-arch-hero__arch img, .is-entering .eva-tile__media img) {
   animation: eva-settle 4.5s var(--eva-ease-out) backwards;
 }
 

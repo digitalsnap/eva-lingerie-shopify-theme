@@ -6,7 +6,7 @@
 >
   <div class="eva-page eva-media-text__grid eva-media-text__grid--image-{{ section.settings.image_position }}">
     <div
-      class="eva-media-text__media eva-media"
+      class="eva-media-text__media eva-media eva-media-text__media--{{ section.settings.image_shape }}"
       data-eva-reveal
     >
       {%- if image != blank -%}
@@ -47,6 +47,46 @@
           {{- section.settings.button_label | escape -}}
         </a>
       {%- endif -%}
+
+      {%- if section.settings.products.size > 0 -%}
+        <div class="eva-media-text__set">
+          {%- if section.settings.products_heading != blank -%}
+            <h3 class="eva-eyebrow eva-media-text__set-heading">{{ section.settings.products_heading | escape }}</h3>
+          {%- endif -%}
+          <ul
+            class="eva-media-text__set-list"
+            role="list"
+          >
+            {%- for product in section.settings.products -%}
+              <li>
+                <a
+                  class="eva-media-text__set-item"
+                  href="{{ product.url }}"
+                >
+                  <span class="eva-media-text__set-media eva-media">
+                    {%- if product.featured_media -%}
+                      {{
+                        product.featured_media
+                        | image_url: width: 160
+                        | image_tag: widths: '80, 160', sizes: '4rem', loading: 'lazy', alt: ''
+                      }}
+                    {%- endif -%}
+                  </span>
+                  <span class="eva-media-text__set-name">{{ product.title | escape }}</span>
+                  <span class="eva-media-text__set-price">
+                    {%- if product.price_varies -%}
+                      {%- assign set_price_min = product.price_min | money -%}
+                      {{- 'eva.card.from_price' | t: price: set_price_min -}}
+                    {%- else -%}
+                      {{- product.price | money -}}
+                    {%- endif -%}
+                  </span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
     </div>
   </div>
 </div>
@@ -76,6 +116,64 @@
 
   .eva-media-text__button {
     margin-block-start: 0.5rem;
+  }
+
+  .eva-media-text__media--arch {
+    border-radius: 999px 999px 0 0;
+  }
+
+  .eva-media-text__media--oval {
+    border-radius: 50%;
+  }
+
+  .eva-media-text__set {
+    align-self: stretch;
+    margin-block-start: 0.5rem;
+  }
+
+  .eva-media-text__set-heading {
+    margin: 0 0 0.25rem;
+  }
+
+  .eva-media-text__set-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .eva-media-text__set-item {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 0.875rem;
+    border-block-end: 1px solid var(--eva-line);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .eva-media-text__set-media {
+    width: 4rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+
+  .eva-media-text__set-name {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .eva-media-text__set-price {
+    font-size: 0.8125rem;
+    color: var(--eva-muted, currentcolor);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .eva-media-text__set-item:hover .eva-media-text__set-name {
+      color: var(--eva-wine);
+    }
   }
 
   @media screen and (min-width: 750px) {
@@ -123,6 +221,17 @@
         { "value": "4 / 5", "label": "4:5" }
       ],
       "default": "5 / 4"
+    },
+    {
+      "type": "select",
+      "id": "image_shape",
+      "label": "t:eva.settings.image_shape",
+      "options": [
+        { "value": "rectangle", "label": "t:eva.options.shape_rectangle" },
+        { "value": "arch", "label": "t:eva.options.shape_arch" },
+        { "value": "oval", "label": "t:eva.options.shape_oval" }
+      ],
+      "default": "rectangle"
     },
     {
       "type": "select",
@@ -181,6 +290,23 @@
         { "value": "gold", "label": "t:eva.options.gold" }
       ],
       "default": "outline"
+    },
+    {
+      "type": "header",
+      "content": "t:eva.content.complete_the_set"
+    },
+    {
+      "type": "text",
+      "id": "products_heading",
+      "label": "t:eva.settings.heading",
+      "default": "Complete the set"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "t:eva.settings.products",
+      "info": "t:eva.info.set_products",
+      "limit": 3
     },
     {
       "type": "header",

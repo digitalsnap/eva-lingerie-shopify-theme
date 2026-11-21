@@ -21,6 +21,10 @@
       assign tile_sizes = '(min-width: 750px) 33vw, 80vw'
       assign tile_size = 'regular'
       assign tile_cta = ''
+    elsif section.settings.layout == 'arch'
+      assign tile_sizes = '(min-width: 750px) 23vw, 45vw'
+      assign tile_size = 'arch'
+      assign tile_cta = section.settings.cta_label
     else
       assign tile_sizes = '(min-width: 750px) 50vw, 100vw'
       assign tile_size = 'large'
